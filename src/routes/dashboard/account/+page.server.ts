@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 
 	const { data: profile } = await supabase
 		.from('profiles')
-		.select(`username, full_name, website, avatar_url`)
+		.select(`username, full_name, website`)
 		.eq('id', claims.sub)
 		.single();
 
@@ -22,10 +22,12 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 export const actions: Actions = {
 	update: async ({ request, locals: { supabase } }) => {
 		const formData = await request.formData();
+		console.log(formData);
 		const fullName = formData.get('fullName') as string;
 		const username = formData.get('username') as string;
 		const website = formData.get('website') as string;
 		const avatarUrl = formData.get('avatarUrl') as string;
+		const email = formData.get('email') as string;
 
 		const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
 
@@ -35,14 +37,14 @@ export const actions: Actions = {
 
 		const { error } = await supabase.from('profiles').upsert({
 			id: claimsData.claims.sub,
-			full_name: fullName,
-			username,
-			website,
-			avatar_url: avatarUrl,
+			first_name: fullName.split(' ')[0],
+			last_name: fullName.split(' ')[1] || '',
+			email,
 			updated_at: new Date()
 		});
 
 		if (error) {
+			console.error(error.message);
 			return fail(500, {
 				fullName,
 				username,
@@ -54,7 +56,6 @@ export const actions: Actions = {
 		return {
 			fullName,
 			username,
-			website,
 			avatarUrl
 		};
 	},

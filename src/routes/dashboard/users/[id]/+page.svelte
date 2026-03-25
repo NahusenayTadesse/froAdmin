@@ -27,8 +27,8 @@
 		{ name: 'Phone', value: data.singleUser?.phone },
 		{ name: 'Role', value: data.singleUser?.role },
 		{ name: 'Status', value: data.singleUser?.status ? 'Active' : 'Inactive' },
-		{ name: 'Created At', value: data.singleUser?.createdAt.toLocaleString() },
-		{ name: 'Updated At', value: data.singleUser?.updatedAt.toLocaleString() }
+		{ name: 'Created At', value: formatDate(data.singleUser?.createdAt) },
+		{ name: 'Updated At', value: formatDate(data.singleUser?.updatedAt) }
 	]);
 
 	const { form, errors, enhance, delayed, capture, restore, allErrors, message } = superForm(
@@ -40,6 +40,7 @@
 	);
 
 	import { toast } from 'svelte-sonner';
+	import { formatDate } from '$lib/global.svelte.js';
 	$effect(() => {
 		if ($message) {
 			if ($message.type === 'error') {
@@ -58,7 +59,7 @@
 
 	$form.name = data.singleUser?.name;
 	$form.email = data.singleUser?.email;
-	$form.role = data.singleUser?.roleId;
+	$form.role = data.singleUser?.role;
 	$form.status = data.singleUser?.status;
 </script>
 
@@ -114,11 +115,11 @@
 
 <br />
 
-<DataTable
+<!-- <DataTable
 	data={data?.permissionList}
 	{columns}
 	fileName="{data?.singleUser?.name}Permission List"
-/>
+/> -->
 
 {#snippet fe(
 	label = '',

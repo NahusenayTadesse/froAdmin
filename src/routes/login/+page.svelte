@@ -10,7 +10,7 @@
 	<title>Login</title>
 </svelte:head>
 
-<div class="flex h-screen w-full items-center justify-self-center px-4">
+<div class="flex h-screen w-full items-center justify-center px-4">
 	<Login data={data?.form} action="?/login" />
 </div>
 

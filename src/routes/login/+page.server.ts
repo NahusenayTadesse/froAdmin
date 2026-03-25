@@ -40,42 +40,31 @@ export const actions: Actions = {
 
 		console.log(form);
 
-		try {
-			const { error } = await supabase.auth.signInWithPassword({
-				email,
-				password
-			});
+		const { error } = await supabase.auth.signInWithPassword({
+			email,
+			password
+		});
 
-			if (error) {
-				setError(form, 'email', 'Invalid email or password');
-				setError(form, 'password', 'Invalid email or password');
-				return message(
-					form,
-					{
-						type: 'error',
-						text: 'An error occurred while logging in'
-					},
-					{
-						status: 500
-					}
-				);
-			}
-
-			return message(form, {
-				type: 'success',
-				text: 'Sign In Successful!'
-			});
-		} catch (err) {
+		if (error) {
+			setError(form, 'email', 'Invalid email or password');
+			setError(form, 'password', 'Invalid email or password');
 			return message(
 				form,
 				{
 					type: 'error',
-					text: 'Registration Failed' + err?.message
+					text: 'An error occurred while logging in'
 				},
 				{
 					status: 500
 				}
 			);
 		}
+
+		// return message(form, {
+		// 	type: 'success',
+		// 	text: 'Sign In Successful!'
+		// });
+
+		redirect('/dashboard', { type: 'success', message: 'Login Successful!' }, event.cookies);
 	}
 };

@@ -14,7 +14,8 @@
 		OctagonMinus,
 		ListOrdered,
 		CookingPot,
-		Cookie
+		Cookie,
+		User
 	} from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
@@ -25,54 +26,12 @@
 
 	const navigation = [
 		{ title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-		{ title: 'Customers', url: '/dashboard/customers', icon: Users },
-		{
-			title: 'Orders',
-			url: '/dashboard/orders',
-			icon: ListOrdered,
-			items: [
-				{ title: 'All Orders', url: '/dashboard/orders/all-orders', icon: Sheet },
-				{ title: 'Pending Orders', url: '/dashboard/orders', icon: Loader },
-				{ title: 'Delivered Orders', url: '/dashboard/orders/delivered', icon: CircleCheckBig },
-				{ title: 'Cancelled Orders', url: '/dashboard/orders/cancelled', icon: OctagonMinus }
-			]
-		},
+		{ title: 'Users', url: '/dashboard/users', icon: Users },
 
 		{
-			title: 'Products',
-			url: '/dashboard/products',
-			icon: Container,
-			items: [
-				{ title: 'All Products', url: '/dashboard/products', icon: Sheet },
-				{ title: 'Add Product', url: '/dashboard/products/add-products', icon: Plus }
-			]
-		},
-
-		{
-			title: 'Messages',
-			url: '/dashboard/messages',
-			icon: Mail
-		},
-
-		{
-			title: 'Reports',
-			url: '/dashboard/reports',
-			icon: ChartArea
-		},
-
-		{
-			title: 'Admin Panel',
-			url: '/dashboard/admin-panel',
-			icon: UserRoundCog,
-			items: [
-				{
-					title: 'Payment Methods',
-					url: '/dashboard/admin-panel/payment-methods',
-					icon: Banknote
-				},
-				{ title: 'Users', url: '/dashboard/admin-panel/users', icon: Users },
-				{ title: 'Roles', url: '/dashboard/admin-panel/roles', icon: Users }
-			]
+			title: 'My Account',
+			url: '/dashboard/account',
+			icon: User
 		}
 	];
 
@@ -117,15 +76,8 @@
 	>
 		<Sidebar.Group>
 			<Sidebar.GroupLabel>
-				<a
-					class="mb-8 flex flex-row items-start justify-start gap-4 py-4"
-					href="/"
-					title="Go to Website Home Page"
-					target="_blank"
-				>
-					<img src="/logo512.png" class="mt-4 h-auto w-full justify-self-start" alt="Logo" />
-				</a></Sidebar.GroupLabel
-			>
+				<h4 class="text-4xl">Fro Admin</h4>
+			</Sidebar.GroupLabel>
 			<Sidebar.GroupContent class="my-4">
 				<NavMain items={navigation} />
 				<!-- <Sidebar.Menu class="w-full gap-3">
@@ -151,8 +103,8 @@
 		</Sidebar.Group>
 	</Sidebar.Content>
 	<Sidebar.Footer class="flex flex-row bg-white dark:bg-black">
-		<Sidebar.GroupLabel>
+		<!-- <Sidebar.GroupLabel>
 			Powered By <a href="https://leoradigitals.com" target="_blank" class="ml-1">Leora Digitals</a>
-		</Sidebar.GroupLabel>
+		</Sidebar.GroupLabel> -->
 	</Sidebar.Footer>
 </Sidebar.Root>
