@@ -7,6 +7,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { Loader, LogOut, User, Globe, Mail } from '@lucide/svelte';
+	import InputComp from '$lib/formComponents/InputComp.svelte';
 
 	// ...
 

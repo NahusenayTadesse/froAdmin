@@ -27,8 +27,8 @@
 		{ name: 'Phone', value: data.singleUser?.phone },
 		{ name: 'Role', value: data.singleUser?.role },
 		{ name: 'Status', value: data.singleUser?.status ? 'Active' : 'Inactive' },
-		{ name: 'Created At', value: formatDate(data.singleUser?.createdAt) },
-		{ name: 'Updated At', value: formatDate(data.singleUser?.updatedAt) }
+		{ name: 'Created At', value: formatDate(new Date(data?.singleUser?.createdAt)) },
+		{ name: 'Updated At', value: formatDate(new Date(data?.singleUser?.updatedAt)) }
 	]);
 
 	const { form, errors, enhance, delayed, capture, restore, allErrors, message } = superForm(

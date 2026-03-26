@@ -9,6 +9,7 @@ import {
 	boolean,
 	date,
 	time,
+	serial,
 	bigint
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
@@ -38,6 +39,60 @@ export const profiles = pgTable('profiles', {
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 	version: bigint('version', { mode: 'number' }),
 	stripeCustomerId: text('stripe_customer_id').unique()
+});
+
+// --- Roles ---
+
+export const roles = pgTable('roles', {
+	id: serial('id').primaryKey(),
+	name: text('name').notNull(),
+	description: text('description'),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
+});
+
+// --- Role Permissions ---
+
+// --- Admin User ---
+
+export const adminUsers = pgTable('admin_users', {
+	id: serial('id').primaryKey(),
+	userId: uuid('provider_id')
+		.notNull()
+		.references(() => profiles.id),
+	roleId: serial('role_id')
+		.notNull()
+		.references(() => roles.id),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
+});
+
+export const rolePermissions = pgTable('role_permissions', {
+	id: serial('id').primaryKey(),
+	roleId: serial('role_id').notNull(),
+	permissionId: serial('permission_id').notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
+});
+
+//--- Permissions ---
+
+export const permissions = pgTable('permissions', {
+	id: serial('id').primaryKey(),
+	name: text('name').notNull(),
+	description: text('description'),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
+});
+
+//--- User Permissions ---
+
+export const userPermissions = pgTable('user_permissions', {
+	id: serial('id').primaryKey(),
+	userId: uuid('user_id').notNull(),
+	permissionId: uuid('permission_id').notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 });
 
 // --- Services & Categories ---

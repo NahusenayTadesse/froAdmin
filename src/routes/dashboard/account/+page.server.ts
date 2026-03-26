@@ -1,6 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
+import { db } from '$lib/server/db';
+import { profiles } from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
+
 export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 	const { data: claimsData, error } = await supabase.auth.getClaims();
 
@@ -10,11 +14,17 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 
 	const { claims } = claimsData;
 
-	const { data: profile } = await supabase
-		.from('profiles')
-		.select(`username, full_name, website`)
-		.eq('id', claims.sub)
-		.single();
+	// const { data: profile } = await supabase
+	// 	.from('profiles')
+	// 	.select(`username, full_name, website`)
+	// 	.eq('id', claims.sub)
+	// 	.single();
+
+	const profile = await db
+		.select()
+		.from(profiles)
+		.where(eq(profiles.id, claims.sub))
+		.then((rows) => rows[0]);
 
 	return { claims, profile };
 };

@@ -7,7 +7,7 @@ export const load: PageServerLoad = async ({ url, locals: { supabase } }) => {
 
 	// if the user is already logged in return them to the account page
 	if (!error && data?.claims) {
-		redirect(303, '/account');
+		redirect(303, '/dashboard');
 	}
 
 	return { url: url.origin };
