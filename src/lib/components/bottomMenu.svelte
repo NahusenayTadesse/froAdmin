@@ -4,9 +4,7 @@
 
 	const mobNav = [
 		{ title: 'Dashboard', url: '/dashboard/', icon: LayoutDashboard },
-		{ title: 'Customers', url: '/dashboard/appointments', icon: UsersRound },
-		{ title: 'Service', url: '/dashboard/services', icon: SquareChartGantt },
-		{ title: 'Supplies', url: '/dashboard/supplies', icon: Container }
+		{ title: 'Users', url: '/dashboard/users', icon: UsersRound }
 	];
 
 	const on = 'text-primary shadow-lg shadow-primary/20 bg-primary/10';
