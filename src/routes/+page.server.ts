@@ -2,15 +2,15 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url, locals: { supabase } }) => {
+export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 	const { data, error } = await supabase.auth.getClaims();
 
 	// if the user is already logged in return them to the account page
 	if (!error && data?.claims) {
 		redirect(303, '/dashboard');
+	} else {
+		redirect(303, '/login');
 	}
-
-	return { url: url.origin };
 };
 
 export const actions: Actions = {
