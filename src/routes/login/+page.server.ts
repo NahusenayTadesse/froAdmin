@@ -46,13 +46,14 @@ export const actions: Actions = {
 		});
 
 		if (error) {
+			console.error(error.message);
 			setError(form, 'email', 'Invalid email or password');
 			setError(form, 'password', 'Invalid email or password');
 			return message(
 				form,
 				{
 					type: 'error',
-					text: 'An error occurred while logging in'
+					text: 'An error occurred while logging in' + error.message
 				},
 				{
 					status: 500
