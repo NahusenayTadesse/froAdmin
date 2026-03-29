@@ -1,22 +1,5 @@
 <script lang="ts">
-	import {
-		Users,
-		UserRoundCog,
-		ChartArea,
-		Mail,
-		LayoutDashboard,
-		Container,
-		Banknote,
-		Plus,
-		Sheet,
-		Loader,
-		CircleCheckBig,
-		OctagonMinus,
-		ListOrdered,
-		CookingPot,
-		Cookie,
-		User
-	} from '@lucide/svelte';
+	import { Users, LayoutDashboard, User, ShieldUser } from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
 	import { bgGradient } from '$lib/global.svelte';
@@ -32,6 +15,12 @@
 			title: 'My Account',
 			url: '/dashboard/account',
 			icon: User
+		},
+
+		{
+			title: 'Admin Panel',
+			url: '/dashboard/admin-panel',
+			icon: ShieldUser
 		}
 	];
 

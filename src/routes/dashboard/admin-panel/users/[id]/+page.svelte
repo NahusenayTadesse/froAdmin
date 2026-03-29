@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { Input } from '$lib/components/ui/input/index.js';
+	import { Label } from '$lib/components/ui/label/index.js';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { editUserSchema } from './schema';
 
@@ -9,9 +11,11 @@
 	import { superForm } from 'sveltekit-superforms/client';
 
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
-	import { ArrowLeft, Pencil, Save, LogOut, PenBox } from '@lucide/svelte';
+	import { ArrowLeft, Pencil, Save } from '@lucide/svelte';
+	import SelectComp from '$lib/formComponents/SelectComp.svelte';
 	import type { Snapshot } from '@sveltejs/kit';
 
+	import Delete from '$lib/forms/Delete.svelte';
 	import SingleView from '$lib/components/SingleView.svelte';
 	import Errors from '$lib/formComponents/Errors.svelte';
 	import DataTable from '$lib/components/Table/data-table.svelte';
@@ -33,12 +37,12 @@
 		data.form,
 		{
 			validators: zod4Client(editUserSchema),
-			resetForm: false
+			resetForm: false,
+			dataType: 'json'
 		}
 	);
 
 	import { toast } from 'svelte-sonner';
-	import Logout from '$lib/forms/Logout.svelte';
 	$effect(() => {
 		if ($message) {
 			if ($message.type === 'error') {
@@ -59,25 +63,25 @@
 	$form.lastName = data.singleUser?.lastName;
 	$form.email = data.singleUser?.email;
 	$form.role = data.singleUser?.roleId;
+	$form.permissionsList = data?.permissionList.map((item) => item.id) || [];
 </script>
 
 <svelte:head>
-	<title>My Account Details</title>
+	<title>User Details</title>
 </svelte:head>
-<SingleView title="My Account Details">
+<SingleView title="User Details">
 	<div class="mt-4 flex w-full flex-row items-start justify-start gap-2 pl-4">
 		<Button onclick={() => (edit = !edit)}>
 			{#if !edit}
 				<Pencil class="h-4 w-4" />
-				Edit Account
+				Edit
 			{:else}
 				<ArrowLeft class="h-4 w-4" />
 
 				Back
 			{/if}
 		</Button>
-		<Button variant="default" href="/dashboard/change-password"><PenBox /> Change Password</Button>
-		<Logout />
+		<Delete redirect="/dashboard/products" />
 	</div>
 	{#if edit === false}
 		<div class="w-full p-4"><SingleTable {singleTable} /></div>
@@ -124,6 +128,27 @@
 					required
 				/>
 
+				<InputComp
+					{form}
+					{errors}
+					name="editPermission"
+					type="checkboxSingle"
+					label="Edit Permission"
+					placeholder="Edit and Modify User Permissions"
+				/>
+
+				{#if $form.editPermission}
+					<InputComp
+						label="Permissions"
+						name="permissionsList"
+						type="checkbox"
+						{form}
+						{errors}
+						placeholder="Enter Role Name"
+						items={data?.allPermissions}
+					/>
+				{/if}
+
 				<!-- {@render fe('First Name', 'firstName', 'text', 'Change Name', true)}
 				{@render fe('Last Name', 'lastName', 'text', 'Change Name', true)}
 				{@render fe('Email', 'email', 'email', 'Change email', true)}
@@ -144,22 +169,13 @@
 </SingleView>
 
 <br />
-<div class="mb-6 flex items-baseline justify-between">
-	<div>
-		<h2 class="text-2xl font-bold tracking-tight">My Permissions</h2>
-		<p class="text-sm text-muted-foreground">
-			<b>{data?.permissionList.length}</b> active permissions.
-		</p>
-	</div>
-</div>
-
-<div class="rounded-md border bg-card">
+{#key data?.permissionList}
 	<DataTable
 		data={data?.permissionList}
 		{columns}
 		fileName="{data?.singleUser?.name} Permission List"
 	/>
-</div>
+{/key}
 
 <!-- {#snippet fe(
 	label = '',

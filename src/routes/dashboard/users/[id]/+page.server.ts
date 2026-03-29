@@ -8,10 +8,19 @@ import { eq, sql } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 import { fail } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
+import { error } from '@sveltejs/kit';
+
+import { z } from 'zod/v4';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const { id } = params;
 
+	const idSchema = z.uuid();
+	const validation = idSchema.safeParse(id);
+
+	if (!validation.success) {
+		error(404, 'Invalid ID, there is no User with this ID');
+	}
 	const form = await superValidate(zod4(schema));
 
 	const singleUser = await db
@@ -31,23 +40,6 @@ export const load: PageServerLoad = async ({ params }) => {
 	if (!singleUser) {
 		return fail(404, { message: 'User not found' });
 	}
-
-	// const roleList = await db
-	// 	.select({
-	// 		value: roles.id,
-	// 		name: roles.name
-	// 	})
-	// 	.from(roles);
-
-	// const permissionList = await db
-	// 	.select({
-	// 		id: permissions.id,
-	// 		name: permissions.name,
-	// 		description: permissions.description
-	// 	})
-	// 	.from(permissions)
-	// 	.innerJoin(rolePermissions, eq(permissions.id, rolePermissions.permissionId))
-	// 	.where(eq(rolePermissions.roleId, singleUser.roleId));
 
 	return {
 		singleUser,

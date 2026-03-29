@@ -53,7 +53,7 @@ export const actions: Actions = {
 				form,
 				{
 					type: 'error',
-					text: 'An error occurred while logging in' + error.message
+					text: 'An error occurred while logging in ' + error.message
 				},
 				{
 					status: 500

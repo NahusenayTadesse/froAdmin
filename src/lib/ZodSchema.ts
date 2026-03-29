@@ -22,10 +22,14 @@ export const loginSchema = z.object({
 export type LoginSchema = typeof loginSchema;
 
 export const addUserSchema = z.object({
-	name: z
+	firstName: z
 		.string()
-		.min(1, 'Full Name is required')
-		.max(100, 'Full Name must be less than 100 characters'),
+		.min(1, 'First Name is required')
+		.max(100, 'First Name must be less than 100 characters'),
+	lastName: z
+		.string()
+		.min(1, 'Last Name is required')
+		.max(100, 'Last Name must be less than 100 characters'),
 	email: z.email('Invalid email address').min(1, 'Email is required'),
 	password: z
 		.string()

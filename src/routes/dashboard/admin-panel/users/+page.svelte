@@ -22,6 +22,7 @@
 			<Frown class="h-12 w-16  animate-bounce" />
 			Users List is Empty
 		</p>
+		<Button href="/dashboard/users/add-users"><Plus />Add New Users</Button>
 	</div>
 {:else}
 	<h2 class="my-4 text-2xl">No of Users: {data.userList?.length}</h2>

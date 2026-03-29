@@ -44,7 +44,7 @@ export const profiles = pgTable('profiles', {
 // --- Roles ---
 
 export const roles = pgTable('roles', {
-	id: serial('id').primaryKey(),
+	id: uuid('id').primaryKey().notNull().defaultRandom(),
 	name: text('name').notNull(),
 	description: text('description'),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
@@ -56,11 +56,13 @@ export const roles = pgTable('roles', {
 // --- Admin User ---
 
 export const adminUsers = pgTable('admin_users', {
-	id: serial('id').primaryKey(),
-	userId: uuid('provider_id')
-		.notNull()
-		.references(() => profiles.id),
-	roleId: serial('role_id')
+	id: uuid('id').primaryKey().notNull(),
+	firstName: text('first_name'),
+	lastName: text('last_name'),
+	email: text('email'),
+	userId: uuid('provider_id').notNull(),
+	createdBy: uuid('created_by').notNull(),
+	roleId: uuid('role_id') // Foreign Key: Matches the type of roles.id
 		.notNull()
 		.references(() => roles.id),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
@@ -68,9 +70,13 @@ export const adminUsers = pgTable('admin_users', {
 });
 
 export const rolePermissions = pgTable('role_permissions', {
-	id: serial('id').primaryKey(),
-	roleId: serial('role_id').notNull(),
-	permissionId: serial('permission_id').notNull(),
+	id: uuid('id').primaryKey().notNull().defaultRandom(),
+	roleId: uuid('role_id') // Foreign Key: Matches the type of roles.id
+		.notNull()
+		.references(() => roles.id),
+	permissionId: uuid('permission_id') // Foreign Key: Matches the type of permissions.id
+		.notNull()
+		.references(() => permissions.id),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 });
@@ -78,7 +84,7 @@ export const rolePermissions = pgTable('role_permissions', {
 //--- Permissions ---
 
 export const permissions = pgTable('permissions', {
-	id: serial('id').primaryKey(),
+	id: uuid('id').primaryKey().notNull().defaultRandom(),
 	name: text('name').notNull(),
 	description: text('description'),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
@@ -88,9 +94,13 @@ export const permissions = pgTable('permissions', {
 //--- User Permissions ---
 
 export const userPermissions = pgTable('user_permissions', {
-	id: serial('id').primaryKey(),
-	userId: uuid('user_id').notNull(),
-	permissionId: uuid('permission_id').notNull(),
+	id: uuid('id').primaryKey().notNull().defaultRandom(),
+	userId: uuid('user_id')
+		.notNull()
+		.references(() => adminUsers.id),
+	permissionId: uuid('permission_id') // Foreign Key: Matches the type of permissions.id
+		.notNull()
+		.references(() => permissions.id),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 });

@@ -7,25 +7,24 @@
 
 	import { Frown, Plus } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
-	import FilterMenu from '$lib/components/Table/FilterMenu.svelte';
-
-	let filteredList = $derived(data?.userList);
 </script>
 
 <svelte:head>
-	<title>Users List</title>
+	<title>Roles List</title>
 </svelte:head>
 
-{#if data.userList.length === 0}
+{#if data.roleList.length === 0}
 	<div class="flex h-96 w-full flex-col items-center justify-center lg:w-5xl">
 		<p class="justify-self-cente mt-4 flex flex-row gap-4 text-center text-4xl">
 			<Frown class="h-12 w-16  animate-bounce" />
-			Users List is Empty
+			Roles List is Empty
 		</p>
+		<Button href="/dashboard/admin-panel/add-roles"><Plus />Add New Roles</Button>
 	</div>
 {:else}
-	<h2 class="my-4 text-2xl">No of Users: {data.userList?.length}</h2>
+	<h2 class="my-4 text-2xl">No of Roles {data.roleList?.length}</h2>
 
-	<FilterMenu data={data?.userList} bind:filteredList filterKeys={['role', 'status', 'email']} />
-	<DataTable data={filteredList} {columns} fileName="Users List" />
+	<div class="mt-8 mb-4 w-[350px] p-0 pt-4 lg:w-full lg:p-0">
+		<DataTable data={data.roleList} {columns} fileName="Roles List" />
+	</div>
 {/if}
