@@ -10,8 +10,8 @@
 	let { children } = $props();
 
 	let userManagement = [
-		{ name: 'Users', href: '/dashboard/admin-panel/users' },
-		{ name: 'Roles', href: '/dashboard/admin-panel/roles' }
+		{ name: 'Admin Users', href: '/dashboard/admin-panel/users' },
+		{ name: 'Admin Roles', href: '/dashboard/admin-panel/roles' }
 	];
 </script>
 

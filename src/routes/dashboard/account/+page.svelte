@@ -64,7 +64,7 @@
 <svelte:head>
 	<title>My Account Details</title>
 </svelte:head>
-<SingleView title="My Account Details">
+<SingleView title="My Account Details" class="w-full!">
 	<div class="mt-4 flex w-full flex-row items-start justify-start gap-2 pl-4">
 		<Button onclick={() => (edit = !edit)}>
 			{#if !edit}
@@ -157,6 +157,7 @@
 	<DataTable
 		data={data?.permissionList}
 		{columns}
+		class="max-w-full!"
 		fileName="{data?.singleUser?.name} Permission List"
 	/>
 </div>

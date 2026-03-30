@@ -12,13 +12,11 @@ import {
 } from '$lib/server/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
-import { fail } from 'sveltekit-superforms';
-import { setFlash } from 'sveltekit-flash-message/server';
+
 import { error } from '@sveltejs/kit';
-import { z } from 'zod/v4';
 
 export const load: PageServerLoad = async ({ locals: { supabase } }) => {
-	const { data: claimsData, error } = await supabase.auth.getClaims();
+	const { data: claimsData, error: authError } = await supabase.auth.getClaims();
 
 	const id = claimsData?.claims.sub;
 	const form = await superValidate(zod4(schema));
@@ -41,7 +39,7 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 		.then((rows) => rows[0]);
 
 	if (!singleUser) {
-		return fail(404, { message: 'User not found, It has been Deleted or does not exist' });
+		error(404, 'User with this ID not found');
 	}
 
 	const roleList = await db
@@ -60,10 +58,6 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 		.from(permissions)
 		.innerJoin(rolePermissions, eq(permissions.id, rolePermissions.permissionId))
 		.where(eq(rolePermissions.roleId, singleUser.roleId));
-
-	if (!singleUser) {
-		error(404, 'User with this ID not found');
-	}
 
 	return {
 		singleUser,

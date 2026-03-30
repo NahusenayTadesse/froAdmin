@@ -44,7 +44,7 @@
 	<title>Add New Role</title>
 </svelte:head>
 
-<FormCard title="Add New Role">
+<FormCard title="Add New Role" className="w-full!">
 	<form use:enhance action="?/add" id="main" class="flex flex-col gap-4" method="POST">
 		<Errors allErrors={$allErrors} />
 		<InputComp label="Name" name="name" type="text" {form} {errors} placeholder="Enter Role Name" />

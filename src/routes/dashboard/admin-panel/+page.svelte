@@ -3,8 +3,8 @@
 	import { Button } from '$lib/components/ui/button';
 
 	let userManagement = [
-		{ name: 'Users', href: '/dashboard/admin-panel/users' },
-		{ name: 'Roles', href: '/dashboard/admin-panel/roles' }
+		{ name: 'Admin Users', href: '/dashboard/admin-panel/users' },
+		{ name: 'Admin Roles', href: '/dashboard/admin-panel/roles' }
 	];
 </script>
 

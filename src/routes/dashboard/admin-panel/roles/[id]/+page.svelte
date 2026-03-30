@@ -67,7 +67,7 @@
 <svelte:head>
 	<title>Role Details</title>
 </svelte:head>
-<SingleView title="Role Details">
+<SingleView title="Role Details" class="w-full!">
 	<div class="mt-4 flex w-full flex-row items-start justify-start gap-2 pl-4">
 		<Button onclick={() => (edit = !edit)}>
 			{#if !edit}
@@ -139,19 +139,27 @@
 <br />
 
 {#if data?.userList?.length}
-	<h3>Users on this Role</h3>
-	<DataTable
-		data={data?.userList}
-		columns={userColumns}
-		fileName="{data?.singleUser.name} Users List"
-	/>
+	<div class="mt-8 space-y-4 border-b border-gray-200 pb-8 dark:border-gray-700">
+		<h3 class="ml-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+			Users on this Role
+		</h3>
+		<DataTable
+			data={data?.userList}
+			columns={userColumns}
+			fileName="{data?.singleUser.name} Users List"
+		/>
+	</div>
 {/if}
-{#if data?.permissionList?.length}
-	<h3>Permissions on this Role</h3>
 
-	<DataTable
-		data={data?.permissionList}
-		{columns}
-		fileName="{data?.singleUser.name} Permissions List"
-	/>
+{#if data?.permissionList?.length}
+	<div class="mt-8 space-y-4">
+		<h3 class="ml-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+			Permissions on this Role
+		</h3>
+		<DataTable
+			data={data?.permissionList}
+			{columns}
+			fileName="{data?.singleUser.name} Permissions List"
+		/>
+	</div>
 {/if}

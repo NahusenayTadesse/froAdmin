@@ -12,7 +12,7 @@
 		{#if photo !== ''}
 			<img src="/files/{photo}" loading="lazy" class="h-48 w-48 rounded-full" alt="{title} photo" />
 		{/if}
-		<h1 class="text-center">{title}</h1>
+		<h1 class="text-bold text-center text-4xl font-black">{title}</h1>
 	</div>
 
 	{@render children()}

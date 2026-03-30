@@ -66,7 +66,7 @@
 <svelte:head>
 	<title>User Details</title>
 </svelte:head>
-<SingleView title="User Details">
+<SingleView title="User Details" class="w-full!">
 	<div class="mt-4 flex w-full flex-row items-start justify-start gap-2 pl-4">
 		<Button onclick={() => (edit = !edit)}>
 			{#if !edit}

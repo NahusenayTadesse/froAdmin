@@ -12,7 +12,10 @@
 		// Customers
 
 		{ label: 'Users', path: '/dashboard/users' },
-		{ label: 'My Account', path: '/dashboard/account' }
+		{ label: 'My Account', path: '/dashboard/account' },
+		{ label: 'Admin Users', path: '/dashboard/admin-panel/users' },
+		{ label: 'Admin Roles', path: '/dashboard/admin-panel/roles' },
+		{ label: 'Change Password', path: '/dashboard/change-password' }
 
 		// Old (legacy)
 	];

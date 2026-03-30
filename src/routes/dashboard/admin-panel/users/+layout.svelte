@@ -9,15 +9,15 @@
 
 <div class="mb-8 flex flex-row items-center justify-start gap-2">
 	<Button
-		href="/dashboard/users"
-		variant={page.url.pathname === '/dashboard/users' ? 'default' : 'outline'}
-		><Sheet /> Users</Button
+		href="/dashboard/admin-panel/users"
+		variant={page.url.pathname === '/dashboard/admin-panel/users' ? 'default' : 'outline'}
+		><Sheet />Admin Users</Button
 	>
 
 	<Button
-		href="/dashboard/users/add-users"
-		variant={page.url.pathname === '/dashboard/users/add-users' ? 'default' : 'outline'}
-		><Plus /> Add User</Button
+		href="/dashboard/admin-panel/users/add-users"
+		variant={page.url.pathname === '/dashboard/admin-panel/users/add-users' ? 'default' : 'outline'}
+		><Plus /> Add Admin User</Button
 	>
 
 	<!-- <DialogComp title="Add New Customer" {content} /> -->

@@ -92,7 +92,7 @@
 	</div>
 {/snippet}
 
-<Card.Root class="flex w-full flex-col gap-4 lg:w-lg">
+<Card.Root class="flex w-full flex-col gap-4 ">
 	<Card.Header>
 		<Card.Title class="text-2xl">Change Password</Card.Title>
 	</Card.Header>

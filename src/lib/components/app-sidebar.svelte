@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Users, LayoutDashboard, User, ShieldUser } from '@lucide/svelte';
+	import { Users, LayoutDashboard, User, ShieldUser, KeyRound } from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
 	import { bgGradient } from '$lib/global.svelte';
@@ -14,13 +14,21 @@
 		{
 			title: 'My Account',
 			url: '/dashboard/account',
-			icon: User
+			icon: User,
+			items: [
+				{ title: 'Profile', url: '/dashboard/account', icon: User },
+				{ title: 'Change Password', url: '/dashboard/change-password', icon: KeyRound }
+			]
 		},
 
 		{
 			title: 'Admin Panel',
 			url: '/dashboard/admin-panel',
-			icon: ShieldUser
+			icon: ShieldUser,
+			items: [
+				{ title: 'Admin Users', url: '/dashboard/admin-panel/users', icon: Users },
+				{ title: 'Admin Roles', url: '/dashboard/admin-panel/roles', icon: ShieldUser }
+			]
 		}
 	];
 

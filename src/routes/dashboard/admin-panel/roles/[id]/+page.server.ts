@@ -4,7 +4,7 @@ import { editRoleSchema as schema } from './schema';
 
 import { db } from '$lib/server/db';
 import { roles, adminUsers as user, permissions, rolePermissions } from '$lib/server/db/schema';
-import { eq, countDistinct, and } from 'drizzle-orm';
+import { eq, countDistinct, and, sql } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 import { fail } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -51,7 +51,9 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	const userList = await db
 		.select({
-			id: user.id
+			id: user.id,
+			name: sql<string>`concat(${user.firstName}, ' ', ${user.lastName})`,
+			email: user.email
 		})
 		.from(user)
 		.where(eq(user.roleId, id));
