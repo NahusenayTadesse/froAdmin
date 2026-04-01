@@ -20,7 +20,7 @@
 			<div class="flex flex-row items-center gap-4">
 				<Search />
 				<DarkMode />
-				<AvatarSettings data={data?.profile?.full_name} />
+				<AvatarSettings data={data.profile.fullname} />
 			</div>
 		</div>
 		<div class="p-2 pt-24 pb-24 lg:pt-4 lg:pb-4">

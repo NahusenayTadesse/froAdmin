@@ -1,6 +1,7 @@
 import { message, superValidate, setError } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { editUserSchema as schema } from './schema';
+import { banUserSchema as ban } from '$lib/ZodSchema';
 
 import { db } from '$lib/server/db';
 import {
@@ -28,6 +29,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	}
 
 	const form = await superValidate(zod4(schema));
+	const banForm = await superValidate(zod4(ban));
 
 	const singleUser = await db
 		.select({
@@ -37,6 +39,9 @@ export const load: PageServerLoad = async ({ params }) => {
 			lastName: user.lastName,
 			email: user.email,
 			roleId: user.roleId,
+			status: user.banned,
+			banReason: user.banReason,
+			bannedAt: user.bannedAt,
 			role: roles.name,
 			createdAt: user.createdAt,
 			updatedAt: user.updatedAt
@@ -93,7 +98,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		id,
 		form,
 		roleList,
-		permissionList
+		permissionList,
+		banForm
 	};
 };
 
@@ -175,30 +181,34 @@ export const actions: Actions = {
 			return message(form, { type: 'error', text: 'User Update Failed ' + err?.message });
 		}
 	},
-	delete: async ({ cookies, params }) => {
+	ban: async ({ params, request }) => {
 		const { id } = params;
+
+		const form = await superValidate(request, zod4(ban));
+
+		const { banReason } = form.data;
 
 		try {
 			if (!id) {
-				return message({ type: 'error', message: `Unexpected Error: ${err?.message}` }, cookies);
+				return message(
+					form,
+					{ type: 'error', text: `Unexpected Error: User Not Found` },
+					{ status: 400 }
+				);
+			}
+
+			if (!form.valid) {
+				// Stay on the same page and set a flash message
+				return message(form, { type: 'error', text: 'Please check your form data.' });
 			}
 
 			await db.transaction(async (tx) => {
-				const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
-				if (authError) {
-					console.error('Error deleting user:', authError);
-					return message(
-						{ type: 'error', message: `Unexpected Error: ${authError?.message}` },
-						cookies
-					);
-				}
-				await tx.delete(user).where(eq(user.id, id));
-				await tx.delete(userPermissions).where(eq(userPermissions.userId, id));
+				await tx.update(user).set({ banned: true, banReason }).where(eq(user.id, id));
 			});
 
-			setFlash({ type: 'success', message: 'User Deleted Successfully!' }, cookies);
+			return message(form, { type: 'success', text: 'User Banned Successfully' });
 		} catch (err) {
-			console.error('Error deleting user:', err);
+			console.error('Error banning user:', err);
 			return fail(400, { type: 'error', message: `Unexpected Error: ${err?.message}` });
 		}
 	}

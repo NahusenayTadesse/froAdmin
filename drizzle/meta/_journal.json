@@ -8,6 +8,13 @@
       "when": 1774817737331,
       "tag": "0000_heavy_morlocks",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775058474794,
+      "tag": "0001_rich_microchip",
+      "breakpoints": true
     }
   ]
 }

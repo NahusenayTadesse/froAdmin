@@ -13,6 +13,7 @@
 	import type { Snapshot } from '@sveltejs/kit';
 
 	import Delete from '$lib/forms/Delete.svelte';
+
 	import SingleView from '$lib/components/SingleView.svelte';
 	import DataTable from '$lib/components/Table/data-table.svelte';
 	import { columns, userColumns } from './columns.js';

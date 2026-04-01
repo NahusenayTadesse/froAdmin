@@ -12,7 +12,7 @@
 
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
 	import { ArrowLeft, Pencil, Save } from '@lucide/svelte';
-	import SelectComp from '$lib/formComponents/SelectComp.svelte';
+	import Ban from '$lib/forms/Ban.svelte';
 	import type { Snapshot } from '@sveltejs/kit';
 
 	import Delete from '$lib/forms/Delete.svelte';
@@ -24,11 +24,22 @@
 	import { columns } from './columns.js';
 	import { formatDate } from '$lib/global.svelte';
 
+	let banTable = $derived([
+		{ name: 'Name', value: data.singleUser?.name },
+		{ name: 'Email', value: data.singleUser?.email },
+		{ name: 'Role', value: data.singleUser?.role },
+		{ name: 'Created At', value: formatDate(data.singleUser?.createdAt) },
+		{ name: 'Updated At', value: formatDate(data.singleUser?.updatedAt) },
+		{ name: 'Status', value: data?.singleUser?.status ? 'Banned' : 'Active' },
+		{ name: 'Ban Reason', value: data.singleUser?.banReason },
+		{ name: 'Banned At', value: formatDate(data.singleUser?.bannedAt) }
+	]);
+
 	let singleTable = $derived([
 		{ name: 'Name', value: data.singleUser?.name },
 		{ name: 'Email', value: data.singleUser?.email },
-		{ name: 'Phone', value: data.singleUser?.phone },
 		{ name: 'Role', value: data.singleUser?.role },
+		{ name: 'Status', value: data?.singleUser?.status ? 'Banned' : 'Active' },
 		{ name: 'Created At', value: formatDate(data.singleUser?.createdAt) },
 		{ name: 'Updated At', value: formatDate(data.singleUser?.updatedAt) }
 	]);
@@ -81,10 +92,13 @@
 				Back
 			{/if}
 		</Button>
+		<Ban data={data.banForm} name={data.singleUser?.name} />
 		<Delete redirect="/dashboard/admin-panel/users" />
 	</div>
 	{#if edit === false}
-		<div class="w-full p-4"><SingleTable {singleTable} /></div>
+		<div class="w-full p-4">
+			<SingleTable singleTable={data?.singleUser?.status ? banTable : singleTable} />
+		</div>
 	{/if}
 	{#if edit}
 		<div class="w-full p-4">

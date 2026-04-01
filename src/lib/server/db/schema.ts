@@ -9,7 +9,6 @@ import {
 	boolean,
 	date,
 	time,
-	serial,
 	bigint
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
@@ -38,7 +37,11 @@ export const profiles = pgTable('profiles', {
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 	version: bigint('version', { mode: 'number' }),
-	stripeCustomerId: text('stripe_customer_id').unique()
+	stripeCustomerId: text('stripe_customer_id').unique(),
+	banned: boolean('banned'),
+	banReason: text('ban_reason'),
+	bannedAt: timestamp('banned_at', { withTimezone: true }),
+	bannedBy: uuid('banned_by')
 });
 
 // --- Roles ---
@@ -66,7 +69,11 @@ export const adminUsers = pgTable('admin_users', {
 		.notNull()
 		.references(() => roles.id),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+	banned: boolean('banned'),
+	banReason: text('ban_reason'),
+	bannedAt: timestamp('banned_at', { withTimezone: true }),
+	bannedBy: uuid('banned_by')
 });
 
 export const rolePermissions = pgTable('role_permissions', {
