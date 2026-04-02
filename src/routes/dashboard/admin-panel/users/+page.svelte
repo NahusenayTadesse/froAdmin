@@ -9,7 +9,63 @@
 	import { Button } from '$lib/components/ui/button';
 	import FilterMenu from '$lib/components/Table/FilterMenu.svelte';
 
-	let filteredList = $derived(data?.userList);
+	import { onMount } from 'svelte';
+	import { supabase } from '$lib/supabaseClient'; // Adjust path to your client
+
+	const user = $derived(data.session?.user);
+
+	// Use a rune to keep the list reactive
+	let onlineUsers = $state([]);
+	const onlineIds = $derived(new Set(onlineUsers.map((u) => u.id)));
+
+	let baseList = $derived(
+		data?.userList.map((user) => ({
+			...user,
+			isOnline: onlineIds.has(user.id)
+		}))
+	);
+
+	let filteredList = $derived(baseList);
+
+	onMount(() => {
+		console.log('component loaded');
+		console.log('user:', user);
+		if (!user) return;
+
+		// 1. Initialize the channel
+		const channel = supabase.channel('froadmin', {
+			config: {
+				presence: {
+					key: user.id // Use user ID as the unique key
+				}
+			}
+		});
+
+		// 2. Listen for sync events
+		channel
+			.on('presence', { event: 'sync' }, () => {
+				onlineUsers = Object.values(channel.presenceState()).flat();
+			})
+			.on('presence', { event: 'join' }, () => {
+				// Also update on join, in case sync doesn't re-fire
+				onlineUsers = Object.values(channel.presenceState()).flat();
+			})
+			.subscribe(async (status) => {
+				console.log('Channel status:', status);
+				if (status === 'SUBSCRIBED') {
+					await channel.track({
+						id: user.id,
+						email: user.email,
+						online_at: new Date().toISOString()
+					});
+				}
+			});
+
+		// Cleanup on unmount
+		return () => {
+			channel.unsubscribe();
+		};
+	});
 </script>
 
 <svelte:head>

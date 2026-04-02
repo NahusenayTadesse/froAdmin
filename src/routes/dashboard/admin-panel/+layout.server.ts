@@ -4,9 +4,9 @@ import { zod4 } from 'sveltekit-superforms/adapters';
 import { createRoleSchema as schema } from '$lib/ZodSchema';
 import { db } from '$lib/server/db';
 import { permissions } from '$lib/server/db/schema';
-import type { PageServerLoad } from './$types.js';
+import type { LayoutServerLoad } from './$types.js';
 
-export const load: PageServerLoad = async () => {
+export const load: LayoutServerLoad = async () => {
 	const form = await superValidate(zod4(schema));
 
 	const allPermissions = await db

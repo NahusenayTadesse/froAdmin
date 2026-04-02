@@ -24,7 +24,7 @@
 	import { columns } from './columns.js';
 	import { formatDate } from '$lib/global.svelte';
 
-	let banTable = $derived([
+	let banned = $derived([
 		{ name: 'Name', value: data.singleUser?.name },
 		{ name: 'Email', value: data.singleUser?.email },
 		{ name: 'Role', value: data.singleUser?.role },
@@ -35,7 +35,7 @@
 		{ name: 'Banned At', value: formatDate(data.singleUser?.bannedAt) }
 	]);
 
-	let singleTable = $derived([
+	let unbanned = $derived([
 		{ name: 'Name', value: data.singleUser?.name },
 		{ name: 'Email', value: data.singleUser?.email },
 		{ name: 'Role', value: data.singleUser?.role },
@@ -43,6 +43,8 @@
 		{ name: 'Created At', value: formatDate(data.singleUser?.createdAt) },
 		{ name: 'Updated At', value: formatDate(data.singleUser?.updatedAt) }
 	]);
+
+	let singleTable = $derived(data?.singleUser?.status ? banned : unbanned);
 
 	const { form, errors, enhance, delayed, capture, restore, allErrors, message } = superForm(
 		data.form,
@@ -54,6 +56,7 @@
 	);
 
 	import { toast } from 'svelte-sonner';
+	import UnBan from '$lib/forms/UnBan.svelte';
 	$effect(() => {
 		if ($message) {
 			if ($message.type === 'error') {
@@ -92,12 +95,16 @@
 				Back
 			{/if}
 		</Button>
-		<Ban data={data.banForm} name={data.singleUser?.name} />
+		{#if data?.singleUser?.status}
+			<UnBan action="?/unban" data={data.unBanForm} name={data.singleUser?.name} />
+		{:else}
+			<Ban action="?/ban" data={data.banForm} name={data.singleUser?.name} />
+		{/if}
 		<Delete redirect="/dashboard/admin-panel/users" />
 	</div>
 	{#if edit === false}
 		<div class="w-full p-4">
-			<SingleTable singleTable={data?.singleUser?.status ? banTable : singleTable} />
+			<SingleTable {singleTable} />
 		</div>
 	{/if}
 	{#if edit}

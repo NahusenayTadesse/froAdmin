@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge/index.js';
-	import { BadgeCheck, Loader, OctagonMinus } from '@lucide/svelte';
+	import { BadgeCheck, CircleCheck, CircleOff, Loader, OctagonMinus } from '@lucide/svelte';
 
 	/* ---------- public prop ---------- */
 	interface Props {
@@ -9,13 +9,17 @@
 	let { status }: Props = $props();
 
 	/* ---------- lookup tables ---------- */
-	const statusMeta = {
+	const statusMeta = $derived({
 		/* confirmed / paid */
 		confirmed: { icon: BadgeCheck, colour: 'bg-green-400' },
 		paid: { icon: BadgeCheck, colour: 'bg-green-400' },
 
 		complete: { icon: BadgeCheck, colour: 'bg-green-400' },
 		incomplete: { icon: OctagonMinus, colour: 'bg-red-500' },
+		banned: { icon: OctagonMinus, colour: 'bg-red-500' },
+
+		offline: { icon: CircleOff, colour: 'bg-red-500' },
+		online: { icon: CircleCheck, colour: 'bg-green-400' },
 
 		/* cancelled / unpaid */
 		cancelled: { icon: OctagonMinus, colour: 'bg-red-500' },
@@ -39,11 +43,11 @@
 
 		/* fallback */
 		unknown: { icon: Loader, colour: 'bg-gray-500' }
-	} as const;
+	} as const);
 
 	/* ---------- derived ---------- */
-	const key = String(status).trim().toLowerCase() as keyof typeof statusMeta;
-	const { icon: Icon, colour } = statusMeta[key] ?? statusMeta.unknown;
+	const key = $derived(String(status).trim().toLowerCase() as keyof typeof statusMeta);
+	const { icon: Icon, colour } = $derived(statusMeta[key] ?? statusMeta.unknown);
 </script>
 
 <Badge variant="secondary" class="{colour} text-white">

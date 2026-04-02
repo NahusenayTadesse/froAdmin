@@ -93,3 +93,7 @@ export const banUserSchema = z.object({
 });
 
 export type BanUserSchema = z.infer<typeof banUserSchema>;
+
+export const unBanUserSchema = z.object({});
+
+export type UBanUserSchema = z.infer<typeof unBanUserSchema>;

@@ -1,10 +1,12 @@
-// src/hooks.server.ts
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY } from '$env/static/public';
 import { createServerClient } from '@supabase/ssr';
-import type { Handle } from '@sveltejs/kit';
+import { error, type Handle } from '@sveltejs/kit';
+import { db } from '$lib/server/db'; // adjust to your db import
+import { adminUsers as user } from '$lib/server/db/schema';
+
+import { eq } from 'drizzle-orm';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	// 1. Initialize the client under its own key
 	event.locals.supabase = createServerClient(
 		PUBLIC_SUPABASE_URL,
 		PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
@@ -20,17 +22,25 @@ export const handle: Handle = async ({ event, resolve }) => {
 		}
 	);
 
-	// const {
-	// 	data: { session }
-	// } = await event.locals.supabase.auth.getSession();
+	const {
+		data: { session }
+	} = await event.locals.supabase.auth.getSession();
 
-	// event.locals.user = session
-	// 	? await db
-	// 			.select()
-	// 			.from(adminUsers)
-	// 			.where(eq(adminUsers.id, session.user.id))
-	// 			.then((rows) => rows[0] ?? null)
-	// 	: null;
+	if (session?.user) {
+		const [dbUser] = await db
+			.select({ banned: user.banned })
+			.from(user)
+			.where(eq(user.id, session.user.id))
+			.limit(1);
+
+		if (dbUser?.banned) {
+			// Destroy the session so they can't keep using stale tokens
+			await event.locals.supabase.auth.signOut();
+			error(403, {
+				message: 'Account Restricted'
+			}); // or '/login' or wherever you want
+		}
+	}
 
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {

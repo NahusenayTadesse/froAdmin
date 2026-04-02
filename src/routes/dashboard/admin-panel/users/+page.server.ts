@@ -12,6 +12,7 @@ export const load: PageServerLoad = async () => {
 			email: user.email,
 			role: roles.name,
 			roleId: user.roleId,
+			status: user.banned,
 			createdAt: user.createdAt,
 			permissionsCount: countDistinct(rolePermissions.id)
 		})

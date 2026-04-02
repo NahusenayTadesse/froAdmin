@@ -7,6 +7,10 @@ import { error } from '@sveltejs/kit';
 
 export const load: LayoutServerLoad = async ({ locals }) => {
 	const {
+		data: { session }
+	} = await locals.supabase.auth.getSession();
+
+	const {
 		data: { user: currentUser },
 		error: authError
 	} = await locals.supabase.auth.getUser();
@@ -14,12 +18,6 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	if (authError || !currentUser) {
 		redirect(303, '/login');
 	}
-
-	// const { data: profile } = await db
-	// 	.from('profiles')
-	// 	.select(`username, full_name, website, avatar_url`)
-	// 	.eq('id', claims.sub)
-	// 	.single();
 
 	const singleUser = await db
 		.select({
@@ -38,12 +36,12 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 		.where(eq(user.id, currentUser.id))
 		.then((rows) => rows[0]);
 
+	// Inside your load function or server logic
 	if (singleUser.status) {
-		error(
-			403,
-			'You have been banned from accessing this dashboard because ' + singleUser.banReason
-		);
+		error(403, {
+			message: 'Account Restricted'
+		});
 	}
 
-	return { profile: singleUser };
+	return { profile: singleUser, session };
 };

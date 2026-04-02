@@ -5,7 +5,6 @@
 	import { selectItem } from '$lib/global.svelte';
 	import { ChevronDown } from '@lucide/svelte';
 	import { fly, slide } from 'svelte/transition';
-	import { or } from 'drizzle-orm';
 
 	let { children } = $props();
 

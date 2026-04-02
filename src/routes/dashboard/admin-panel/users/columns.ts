@@ -3,6 +3,7 @@ import DataTableLinks from '$lib/components/Table/data-table-links.svelte';
 import Copy from '$lib/Copy.svelte';
 import DataTableActions from './data-table-actions.svelte';
 import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
+import Stasuses from '$lib/components/Table/statuses.svelte';
 import { formatDate, formatEthiopianDate } from '$lib/global.svelte';
 
 export const columns = [
@@ -63,6 +64,20 @@ export const columns = [
 		}
 	},
 	{
+		accessorKey: 'isOnline',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Status',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true,
+		cell: ({ row }) => {
+			return renderComponent(Stasuses, {
+				status: row.original.isOnline ? 'Online' : 'Offline'
+			});
+		}
+	},
+	{
 		accessorKey: 'status',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
@@ -71,8 +86,9 @@ export const columns = [
 			}),
 		sortable: true,
 		cell: ({ row }) => {
-			const status = row.original.status;
-			return status ? 'Active' : 'Inactive';
+			return renderComponent(Stasuses, {
+				status: row.original.status ? 'Banned' : 'Active'
+			});
 		}
 	},
 
