@@ -4,7 +4,7 @@ import { fail } from '@sveltejs/kit';
 
 import { addUserSchema as schema } from './schema';
 import { db } from '$lib/server/db';
-import { roles, adminUsers as user } from '$lib/server/db/schema';
+import { roles, profiles as user } from '$lib/server/db/schema';
 import type { Actions } from './$types';
 import type { PageServerLoad } from './$types.js';
 

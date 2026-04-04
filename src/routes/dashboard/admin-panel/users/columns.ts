@@ -64,6 +64,53 @@ export const columns = [
 		}
 	},
 	{
+		accessorKey: 'lastSeen',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Last Seen',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true,
+		cell: ({ row }) => {
+			const rawValue = row.original.lastSeen;
+
+			// Check if the value actually exists
+			if (!rawValue) return 'Never';
+
+			const dateObj = new Date(rawValue);
+
+			// Check if the string was actually a valid date format
+			if (isNaN(dateObj.getTime())) return 'Invalid Date';
+
+			return new Intl.DateTimeFormat('en-US', {
+				dateStyle: 'medium',
+				timeStyle: 'short'
+			}).format(dateObj);
+		}
+	},
+	{
+		accessorKey: 'device',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Device',
+				onclick: column.getToggleSortingHandler()
+			}),
+		cell: ({ row }) => {
+			return row.original.device ?? 'No Device';
+		}
+	},
+	{
+		accessorKey: 'location',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Location',
+				onclick: column.getToggleSortingHandler()
+			}),
+		cell: ({ row }) => {
+			return row.original.location ?? 'No Location';
+		}
+	},
+	{
 		accessorKey: 'isOnline',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {

@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { eq, sql, countDistinct } from 'drizzle-orm';
-import type { PageServerLoad } from '../$types';
+import type { PageServerLoad } from './$types';
 import { adminUsers as user, roles, rolePermissions } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async () => {

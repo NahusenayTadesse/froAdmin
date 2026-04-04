@@ -43,43 +43,8 @@
 </script>
 
 <svelte:head>
-	<title>Add New Service</title>
+	<title>Add New User</title>
 </svelte:head>
-
-{#snippet fe(
-	label = '',
-	name = '',
-	type = '',
-	placeholder = '',
-	required = false,
-	min = '',
-	max = ''
-)}
-	<div class="flex w-full flex-col justify-start gap-2">
-		<Label for={name}>{label}</Label>
-		<Input
-			{type}
-			{name}
-			{placeholder}
-			{required}
-			{min}
-			{max}
-			bind:value={$form[name]}
-			aria-invalid={$errors[name] ? 'true' : undefined}
-		/>
-		{#if $errors[name]}
-			<span class="text-red-500">{$errors[name]}</span>
-		{/if}
-	</div>
-{/snippet}
-{#snippet selects(name, items)}
-	<div class="flex w-full flex-col justify-start gap-2">
-		<Label for={name} class="capitalize">{name.replace(/([a-z])([A-Z])/g, '$1 $2')}:</Label>
-
-		<SelectComp {name} bind:value={$form[name]} {items} />
-		{#if $errors[name]}<span class="text-red-500">{$errors[name]}</span>{/if}
-	</div>
-{/snippet}
 
 <Card.Root class="flex w-full flex-col gap-4 lg:w-lg">
 	<Card.Header>

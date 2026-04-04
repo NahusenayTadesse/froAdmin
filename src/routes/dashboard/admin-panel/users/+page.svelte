@@ -19,14 +19,37 @@
 	const onlineIds = $derived(new Set(onlineUsers.map((u) => u.id)));
 
 	let baseList = $derived(
-		data?.userList.map((user) => ({
-			...user,
-			isOnline: onlineIds.has(user.id)
-		}))
+		data?.userList.map((userRecord) => {
+			// Find the matching online user object
+			const presenceData = onlineUsers.find((u) => u.id === userRecord.id);
+
+			return {
+				...userRecord,
+				isOnline: !!presenceData,
+				// Add the dynamic properties from Presence
+				lastSeen: presenceData?.lastSeen || 'Offline',
+				device: presenceData?.device || 'Unknown',
+				location: presenceData?.location || 'Unknown'
+			};
+		})
 	);
+	const getCoords = () => {
+		return new Promise((resolve) => {
+			if (!navigator.geolocation) {
+				return resolve('Not Supported');
+			}
 
-	let filteredList = $derived(baseList);
-
+			navigator.geolocation.getCurrentPosition(
+				(position) => {
+					const { latitude, longitude } = position.coords;
+					resolve(`${latitude}, ${longitude}`);
+				},
+				(error) => {
+					resolve('Permission Denied/Error');
+				}
+			);
+		});
+	};
 	onMount(() => {
 		console.log('component loaded');
 		console.log('user:', user);
@@ -51,13 +74,31 @@
 				onlineUsers = Object.values(channel.presenceState()).flat();
 			})
 			.subscribe(async (status) => {
-				console.log('Channel status:', status);
 				if (status === 'SUBSCRIBED') {
-					await channel.track({
-						id: user.id,
-						email: user.email,
-						online_at: new Date().toISOString()
-					});
+					if (status === 'SUBSCRIBED') {
+						let locationString = 'Unknown';
+
+						try {
+							// Fetch location based on the user's IP address
+							const response = await fetch('https://ipapi.co/json/');
+							const data = await response.json();
+
+							// Format how you want it to appear in your table
+							locationString = `${data.city}, ${data.country_name}`;
+						} catch (error) {
+							console.error('Location fetch failed', error);
+						}
+						const userLocation = await getCoords();
+						await channel.track({
+							id: user.id,
+							email: user.email,
+							online_at: new Date().toISOString(),
+							lastSeen: user.last_sign_in_at,
+							device: navigator?.userAgentData?.platform ?? 'Loading...',
+							browser: navigator.userAgent ?? 'Loading...',
+							location: locationString
+						});
+					}
 				}
 			});
 
@@ -66,6 +107,8 @@
 			channel.unsubscribe();
 		};
 	});
+
+	let filteredList = $derived(baseList);
 </script>
 
 <svelte:head>
@@ -84,5 +127,5 @@
 	<h2 class="my-4 text-2xl">No of Users: {data.userList?.length}</h2>
 
 	<FilterMenu data={data?.userList} bind:filteredList filterKeys={['role', 'status', 'email']} />
-	<DataTable data={filteredList} {columns} fileName="Users List" />
+	<DataTable data={filteredList} class="lg:w-6xl!" {columns} fileName="Users List" />
 {/if}
