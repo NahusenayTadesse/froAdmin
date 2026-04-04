@@ -4,20 +4,19 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { ExternalLink } from '@lucide/svelte';
 	import { dropdownClass } from '$lib/global.svelte';
-
 	let { id, name }: { id: string; name: string } = $props();
 </script>
 
 <DropdownMenu.Root>
 	<DropdownMenu.Trigger>
 		{#snippet child({ props })}
-			<Button {...props} variant="ghost" size="icon" class="relative size-8 p-0">
+			<Button {...props} variant="ghost" size="lg" class="relative p-0">
 				<span class="sr-only">Open menu</span>
 				<EllipsisIcon />
 			</Button>
 		{/snippet}
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content>
+	<DropdownMenu.Content class="w-36">
 		<DropdownMenu.Group>
 			<DropdownMenu.Label>Actions</DropdownMenu.Label>
 		</DropdownMenu.Group>

@@ -5,6 +5,13 @@ import DataTableActions from './data-table-actions.svelte';
 import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
 import Stasuses from '$lib/components/Table/statuses.svelte';
 import { formatDate, formatEthiopianDate } from '$lib/global.svelte';
+import { banUserSchema as ban, unBanUserSchema as unBan } from '$lib/ZodSchema';
+import { superValidate } from 'sveltekit-superforms';
+import { zod4 } from 'sveltekit-superforms/adapters';
+import Ban from '$lib/forms/Ban.svelte';
+import UnBan from '$lib/forms/UnBan.svelte';
+const banForm = await superValidate(zod4(ban));
+const unBanForm = await superValidate(zod4(unBan));
 
 export const columns = [
 	{
@@ -114,7 +121,7 @@ export const columns = [
 		accessorKey: 'isOnline',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
-				name: 'Status',
+				name: 'Online Status',
 				onclick: column.getToggleSortingHandler()
 			}),
 		sortable: true,
@@ -139,16 +146,30 @@ export const columns = [
 		}
 	},
 
-	// {
-	// 	accessorKey: 'permissionsCount',
-	// 	header: ({ column }) =>
-	// 		renderComponent(DataTableSort, {
-	// 			name: 'Permissions Count',
-	// 			onclick: column.getToggleSortingHandler()
-	// 		}),
-	// 	sortable: true,
-	// 	cell: (info) => `${info.getValue()} Permissions` // always “day”
-	// },
+	{
+		accessorKey: 'ban',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Ban or Unban',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true,
+		cell: ({ row }) => {
+			if (!row.original.status) {
+				return renderComponent(Ban, {
+					data: banForm,
+					action: `/dashboard/admin-panel/users/${row.original.id}/?/ban`,
+					name: row.original.name
+				});
+			} else {
+				return renderComponent(UnBan, {
+					data: unBanForm,
+					action: `/dashboard/admin-panel/users/${row.original.id}/?/unban`,
+					name: row.original.name
+				});
+			}
+		}
+	},
 
 	{
 		accessorKey: 'createdAt',
