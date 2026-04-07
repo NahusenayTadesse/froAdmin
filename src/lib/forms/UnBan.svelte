@@ -48,7 +48,7 @@
 	>
 		<Unban />UnBan {name}
 	</Dialog.Trigger>
-	<Dialog.Content class="w-full bg-white">
+	<Dialog.Content class="w-full ">
 		<Dialog.Header>
 			<Dialog.Title class=" text-center text-lg"
 				>Are you sure you want to unban {name}?</Dialog.Title

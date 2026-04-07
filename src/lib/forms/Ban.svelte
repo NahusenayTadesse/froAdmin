@@ -49,7 +49,7 @@
 	>
 		<Ban /> Ban {name}
 	</Dialog.Trigger>
-	<Dialog.Content class="w-full bg-white">
+	<Dialog.Content class="w-full bg-background">
 		<Dialog.Header>
 			<Dialog.Title class=" text-center text-4xl text-destructive">Ban {name}</Dialog.Title>
 		</Dialog.Header>

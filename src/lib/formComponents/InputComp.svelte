@@ -64,7 +64,7 @@
 		<AddressInput bind:query={$form[name]} />
 		<input type="hidden" {name} bind:value={$form[name]} />
 	{:else}
-		<Input {type} {name} bind:value={$form[name]} {max} {min} {placeholder} {required} />
+		<Input {type} {name} bind:value={$form[name]} step="any" {max} {min} {placeholder} {required} />
 	{/if}
 
 	{#if $errors[name]}

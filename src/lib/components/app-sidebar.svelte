@@ -9,7 +9,7 @@
 
 	const navigation = [
 		{ title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-		{ title: 'Users', url: '/dashboard/users', icon: Users },
+		{ title: 'Customers', url: '/dashboard/users', icon: Users },
 
 		{
 			title: 'My Account',

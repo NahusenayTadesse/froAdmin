@@ -96,9 +96,17 @@
 			{/if}
 		</Button>
 		{#if data?.singleUser?.status}
-			<UnBan action="?/unban" data={data.unBanForm} name={data.singleUser?.name} />
+			<UnBan
+				action="?/unban"
+				data={data.unBanForm}
+				name="{data.singleUser?.firstName} {data.singleUser?.lastName}"
+			/>
 		{:else}
-			<Ban action="?/ban" data={data.banForm} name={data.singleUser?.name} />
+			<Ban
+				action="?/ban"
+				data={data.banForm}
+				name="{data.singleUser?.firstName} {data.singleUser?.lastName}"
+			/>
 		{/if}
 		<Delete redirect="/dashboard/admin-panel/users" />
 	</div>

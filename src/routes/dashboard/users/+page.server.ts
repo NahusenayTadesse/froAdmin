@@ -1,21 +1,14 @@
 import { db } from '$lib/server/db';
-import { eq, sql } from 'drizzle-orm';
-import type { PageServerLoad } from '../$types';
+import type { PageServerLoad } from './$types';
 import { profiles as user } from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
 
 export const load: PageServerLoad = async () => {
-	const userList = await db
-		.select({
-			id: user.id,
-			name: sql<string>`concat(${user.firstName}, ' ', ${user.lastName})`,
-			email: user.email,
-			role: user.role,
-			status: user.isVerifiedProvider,
-			createdAt: user.createdAt
-		})
-		.from(user);
-
-	return {
-		userList
-	};
+	try {
+		const userList = await db.select().from(user).where(eq(user.role, 'customer'));
+		return { userList };
+	} catch (e) {
+		console.error('Full DB error:', JSON.stringify(e, null, 2));
+		throw e;
+	}
 };

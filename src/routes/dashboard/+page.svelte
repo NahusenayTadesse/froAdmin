@@ -53,7 +53,7 @@
 	<h2 class="mb-4 text-xl font-bold">Active Users ({onlineUsers.length})</h2>
 
 	<ul class="space-y-2">
-		{#each onlineUsers as presence}
+		{#each onlineUsers as presence (presence)}
 			<li class="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 p-2">
 				<span class="h-3 w-3 animate-pulse rounded-full bg-green-500"></span>
 				<span class="text-zinc-200">{presence.email}</span>

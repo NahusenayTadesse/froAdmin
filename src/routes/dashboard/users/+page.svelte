@@ -27,5 +27,5 @@
 	<h2 class="my-4 text-2xl">No of Users: {data.userList?.length}</h2>
 
 	<FilterMenu data={data?.userList} bind:filteredList filterKeys={['role', 'status', 'email']} />
-	<DataTable data={filteredList} {columns} fileName="Users List" />
+	<DataTable data={filteredList} {columns} fileName="Users List" class="max-w-6xl!" />
 {/if}
