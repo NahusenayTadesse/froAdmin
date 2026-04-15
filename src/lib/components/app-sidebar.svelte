@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Users, LayoutDashboard, User, ShieldUser, KeyRound } from '@lucide/svelte';
+	import { Users, LayoutDashboard, User, ShieldUser, KeyRound, UserCheck } from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
 	import { bgGradient } from '$lib/global.svelte';
@@ -10,6 +10,7 @@
 	const navigation = [
 		{ title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
 		{ title: 'Customers', url: '/dashboard/users', icon: Users },
+		{ title: 'Vendors', url: '/dashboard/vendor', icon: UserCheck },
 
 		{
 			title: 'My Account',

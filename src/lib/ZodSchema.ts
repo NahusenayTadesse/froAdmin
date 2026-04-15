@@ -97,3 +97,9 @@ export type BanUserSchema = z.infer<typeof banUserSchema>;
 export const unBanUserSchema = z.object({});
 
 export type UBanUserSchema = z.infer<typeof unBanUserSchema>;
+
+export const verifyUserSchema = z.object({
+	verify: z.boolean(),
+	verificationStatus: z.string()
+});
+export type VerifyUserSchema = z.infer<typeof verifyUserSchema>;
