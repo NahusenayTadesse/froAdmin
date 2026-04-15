@@ -26,6 +26,17 @@
 {:else}
 	<h2 class="my-4 text-2xl">No of Service Providers: {data.userList?.length}</h2>
 
-	<FilterMenu data={data?.userList} bind:filteredList filterKeys={['role', 'status', 'email']} />
+	<FilterMenu
+		data={data?.userList}
+		bind:filteredList
+		filterKeys={[
+			'role',
+			'status',
+			'isVerifiedProvider',
+			'verificationStatus',
+			'numberOfServices',
+			'banned'
+		]}
+	/>
 	<DataTable data={filteredList} {columns} fileName="Users List" class="max-w-6xl!" />
 {/if}

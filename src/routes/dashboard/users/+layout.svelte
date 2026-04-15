@@ -11,7 +11,7 @@
 	<Button
 		href="/dashboard/users"
 		variant={page.url.pathname === '/dashboard/users' ? 'default' : 'outline'}
-		><Sheet /> Users</Button
+		><Sheet /> Customers</Button
 	>
 
 	<!-- <DialogComp title="Add New Customer" {content} /> -->

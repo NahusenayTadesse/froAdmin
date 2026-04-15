@@ -73,6 +73,15 @@ export const columns = [
 			});
 		}
 	},
+
+	{
+		accessorKey: 'numberOfServices',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Number of Services',
+				onclick: column.getToggleSortingHandler()
+			})
+	},
 	{
 		accessorKey: 'address',
 		header: ({ column }) =>
@@ -128,6 +137,37 @@ export const columns = [
 			// You can pass whatever you need from `row.original` to the component
 			return renderComponent(Statuses, {
 				status: row.original.banned ? 'Banned' : 'Active'
+			});
+		}
+	},
+
+	{
+		accessorKey: 'isVerifiedProvider',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Verified Provider',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true,
+		cell: ({ row }) => {
+			// You can pass whatever you need from `row.original` to the component
+			return renderComponent(Statuses, {
+				status: row.original.isVerifiedProvider ? 'Verified' : 'Pending'
+			});
+		}
+	},
+	{
+		accessorKey: 'verificationStatus',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Verification Status',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true,
+		cell: ({ row }) => {
+			// You can pass whatever you need from `row.original` to the component
+			return renderComponent(Statuses, {
+				status: row.original.verificationStatus
 			});
 		}
 	},

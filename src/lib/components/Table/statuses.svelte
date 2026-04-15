@@ -13,6 +13,7 @@
 		/* confirmed / paid */
 		confirmed: { icon: BadgeCheck, colour: 'bg-green-400' },
 		verified: { icon: BadgeCheck, colour: 'bg-green-400' },
+		approved: { icon: BadgeCheck, colour: 'bg-green-400' },
 		paid: { icon: BadgeCheck, colour: 'bg-green-400' },
 
 		complete: { icon: BadgeCheck, colour: 'bg-green-400' },
