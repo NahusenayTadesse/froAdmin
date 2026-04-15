@@ -14,10 +14,12 @@
 		confirmed: { icon: BadgeCheck, colour: 'bg-green-400' },
 		verified: { icon: BadgeCheck, colour: 'bg-green-400' },
 		approved: { icon: BadgeCheck, colour: 'bg-green-400' },
+		popular: { icon: BadgeCheck, colour: 'bg-green-400' },
 		paid: { icon: BadgeCheck, colour: 'bg-green-400' },
 
 		complete: { icon: BadgeCheck, colour: 'bg-green-400' },
 		incomplete: { icon: OctagonMinus, colour: 'bg-red-500' },
+		unpopular: { icon: OctagonMinus, colour: 'bg-red-500' },
 		banned: { icon: OctagonMinus, colour: 'bg-red-500' },
 
 		offline: { icon: CircleOff, colour: 'bg-red-500' },
