@@ -19,3 +19,13 @@ export const edit = z.object({
 	requiresAfterImage: z.boolean('Requires After Image is required').default(false)
 });
 export type Edit = z.infer<typeof edit>;
+
+export const disable = z.object({
+	id: z.coerce.string('Category Not Found')
+});
+export type Disable = z.infer<typeof disable>;
+
+export const enable = z.object({
+	id: z.coerce.string('Category Not Found')
+});
+export type Enable = z.infer<typeof enable>;

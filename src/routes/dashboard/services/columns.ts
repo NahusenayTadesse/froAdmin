@@ -4,6 +4,7 @@ import BigText from '$lib/components/Table/bigText.svelte';
 import Statuses from '$lib/components/Table/statuses.svelte';
 import Rating from '$lib/components/Table/rating.svelte';
 import { formatDate } from '$lib/global.svelte.js';
+import DataTableLinks from '$lib/components/Table/data-table-links.svelte';
 
 export const columns = [
 	{
@@ -20,7 +21,14 @@ export const columns = [
 				name: 'Title',
 				onclick: column.getToggleSortingHandler()
 			}),
-		sortable: true
+		sortable: true,
+		cell: ({ row }) => {
+			return renderComponent(DataTableLinks, {
+				id: row.original.id,
+				name: row.original.shortDescription,
+				link: '/dashboard/services'
+			});
+		}
 	},
 
 	{

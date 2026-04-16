@@ -6,6 +6,7 @@
 	import DialogComp from '$lib/formComponents/DialogComp.svelte';
 	import { Button } from '$lib/components/ui/button/index';
 	import Edit from './edit.svelte';
+	import Disable from './disable.svelte';
 	const columns = [
 		{
 			accessorKey: 'index',
@@ -129,6 +130,32 @@
 				});
 			}
 		},
+
+		{
+			accessorKey: 'status',
+			header: ({ column }) =>
+				renderComponent(DataTableSort, {
+					name: 'Require After Images',
+					onclick: column.getToggleSortingHandler()
+				}),
+			sortable: true,
+			cell: ({ row }) => {
+				// You can pass whatever you need from `row.original` to the component
+				return row.original.status
+					? renderComponent(Disable, {
+							id: row.original.id,
+							name: row.original.name,
+							action: '?/disable',
+							data: data?.disableForm
+						})
+					: renderComponent(Enable, {
+							id: row.original.id,
+							name: row.original.name,
+							action: '?/enable',
+							data: data?.enableForm
+						});
+			}
+		},
 		{
 			accessorKey: 'createdAt',
 			header: ({ column }) =>
@@ -162,6 +189,7 @@
 
 	const { form, errors, enhance, delayed, message } = superForm(data.form, {});
 
+	import Enable from './enable.svelte';
 	import { toast } from 'svelte-sonner';
 	import { formatDate } from '$lib/global.svelte.js';
 	$effect(() => {

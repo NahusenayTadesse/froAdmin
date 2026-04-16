@@ -125,7 +125,8 @@ export const serviceCategories = pgTable('service_categories', {
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 	allowImages: boolean('allow_images').default(true).notNull(),
 	requiresBeforeImage: boolean('requires_before_image').default(false).notNull(),
-	requiresAfterImage: boolean('requires_after_image').default(false).notNull()
+	requiresAfterImage: boolean('requires_after_image').default(false).notNull(),
+	status: boolean('status').default(true).notNull()
 });
 
 export const services = pgTable('services', {

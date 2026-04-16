@@ -2,7 +2,7 @@ import { setError, superValidate, message, fail } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { eq } from 'drizzle-orm';
 
-import { add, edit } from './schema';
+import { add, edit, disable, enable } from './schema';
 import { db } from '$lib/server/db';
 import { serviceCategories as department } from '$lib/server/db/schema';
 import type { Actions } from './$types';
@@ -11,13 +11,17 @@ import type { PageServerLoad } from './$types.js';
 export const load: PageServerLoad = async () => {
 	const form = await superValidate(zod4(add));
 	const editForm = await superValidate(zod4(edit));
+	const disableForm = await superValidate(zod4(disable));
+	const enableForm = await superValidate(zod4(enable));
 
 	const allData = await db.select().from(department).orderBy(department.sortOrder);
 
 	return {
 		form,
 		editForm,
-		allData
+		disableForm,
+		allData,
+		enableForm
 	};
 };
 
@@ -47,7 +51,7 @@ export const actions: Actions = {
 				type: 'error',
 				text:
 					err.code === 'ER_DUP_ENTRY'
-						? 'Educational Level already exists. Please choose another one.'
+						? 'Service Category already exists. Please choose another one.'
 						: err.message
 			});
 		}
@@ -55,7 +59,7 @@ export const actions: Actions = {
 	edit: async ({ request }) => {
 		const form = await superValidate(request, zod4(edit));
 		if (!form.valid) {
-			return fail(400, { form });
+			return message(form, { type: 'error', text: 'Please check the form for Errors' });
 		}
 
 		const { id, name, description, allowImages, requiresBeforeImage, requiresAfterImage } =
@@ -66,16 +70,51 @@ export const actions: Actions = {
 				.update(department)
 				.set({ name, description, allowImages, requiresBeforeImage, requiresAfterImage })
 				.where(eq(department.id, id));
-			return message(form, { type: 'success', text: 'Educational Level Successfully Updated' });
+			return message(form, { type: 'success', text: 'Service Category Successfully Updated' });
 		} catch (err: any) {
 			if (err.code === 'ER_DUP_ENTRY') return;
-			setError(form, 'name', 'Educational Level name already exists.');
+			setError(form, 'name', 'Service Category name already exists.');
 			return message(form, {
 				type: 'error',
 				text:
 					err.code === 'ER_DUP_ENTRY'
-						? 'Educational Level name is already taken. Please choose another one.'
+						? 'Service Category  name is already taken. Please choose another one.'
 						: err.message
+			});
+		}
+	},
+	disable: async ({ request }) => {
+		const form = await superValidate(request, zod4(disable));
+		if (!form.valid) {
+			return message(form, { type: 'error', text: 'Please check the form for Errors' });
+		}
+
+		const { id } = form.data;
+
+		try {
+			await db.update(department).set({ status: false }).where(eq(department.id, id));
+			return message(form, { type: 'success', text: 'Service Category Successfully Updated' });
+		} catch (err: any) {
+			return message(form, {
+				type: 'error',
+				text: err.message
+			});
+		}
+	},
+	enable: async ({ request }) => {
+		const form = await superValidate(request, zod4(disable));
+		if (!form.valid) {
+			return message(form, { type: 'error', text: 'Please check the form for Errors' });
+		}
+		const { id } = form.data;
+
+		try {
+			await db.update(department).set({ status: true }).where(eq(department.id, id));
+			return message(form, { type: 'success', text: 'Service Category Successfully Updated' });
+		} catch (err: any) {
+			return message(form, {
+				type: 'error',
+				text: err.message
 			});
 		}
 	}
