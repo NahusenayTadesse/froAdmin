@@ -62,7 +62,14 @@ export const actions: Actions = {
 		const { id } = params;
 		const form = await superValidate(request, zod4(edit));
 		if (!form.valid) {
-			return fail(400, { form });
+			return message(
+				form,
+				{
+					type: 'error',
+					text: 'Plase check the form for errors'
+				},
+				{ status: 400 }
+			);
 		}
 
 		try {
