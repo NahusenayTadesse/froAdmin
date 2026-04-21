@@ -11,7 +11,7 @@
 	import { superForm } from 'sveltekit-superforms/client';
 
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
-	import { ArrowLeft, Pencil, Save } from '@lucide/svelte';
+	import { ArrowLeft, CalendarClock, Pencil, Save } from '@lucide/svelte';
 	import SelectComp from '$lib/formComponents/SelectComp.svelte';
 	import type { Snapshot } from '@sveltejs/kit';
 
@@ -68,6 +68,7 @@
 
 	import { toast } from 'svelte-sonner';
 	import { formatDate } from '$lib/global.svelte.js';
+	import { page } from '$app/state';
 	$effect(() => {
 		if ($message) {
 			if ($message.type === 'error') {
@@ -88,7 +89,7 @@
 <svelte:head>
 	<title>Service Details</title>
 </svelte:head>
-<SingleView title="Customer Details" class="w-full!">
+<SingleView title="Service Details" class="w-full!">
 	<div class="mt-4 flex w-full flex-row items-start justify-start gap-2 pl-4">
 		<Button onclick={() => (edit = !edit)}>
 			{#if !edit}
@@ -100,21 +101,9 @@
 				Back
 			{/if}
 		</Button>
-		<!-- {#if data?.singleUser?.banned}
-			<UnBan
-				action="?/unban"
-				data={data.unBanForm}
-				name="{data.singleUser?.firstName} {data.singleUser?.lastName}"
-			/>
-		{/if}
-		{#if !data?.singleUser?.banned}
-			<Ban
-				action="?/ban"
-				data={data.banForm}
-				name="{data.singleUser?.firstName} {data.singleUser?.lastName}"
-			/>
-		{/if} -->
-		<!-- <Delete redirect="/dashboard/users" /> -->
+		<Button href="/dashboard/services/{page.params.id}/bookings">
+			<CalendarClock /> Bookings
+		</Button>
 	</div>
 	{#if edit === false}
 		<div class="w-full p-4">

@@ -11,7 +11,7 @@
 	import { superForm } from 'sveltekit-superforms/client';
 
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
-	import { ArrowLeft, Pencil, Save } from '@lucide/svelte';
+	import { ArrowLeft, CalendarClock, Pencil, Save } from '@lucide/svelte';
 	import SelectComp from '$lib/formComponents/SelectComp.svelte';
 	import type { Snapshot } from '@sveltejs/kit';
 
@@ -103,6 +103,7 @@
 	import { Provider } from '$lib/components/ui/sidebar/index.js';
 	import Statuses from '$lib/components/Table/statuses.svelte';
 	import Verify from '$lib/forms/Verify.svelte';
+	import { page } from '$app/state';
 	$effect(() => {
 		if ($message) {
 			if ($message.type === 'error') {
@@ -135,6 +136,11 @@
 				Back
 			{/if}
 		</Button>
+
+		<Button href="/dashboard/vendor/{page.params.id}/bookings">
+			<CalendarClock /> Bookings
+		</Button>
+
 		{#if data?.singleUser?.banned}
 			<UnBan
 				action="?/unban"

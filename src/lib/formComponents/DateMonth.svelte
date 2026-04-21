@@ -40,11 +40,10 @@
 
 		return isNaN(d.getTime()) // make sure we really have a valid date
 			? 'Pick a date'
-			: d.toLocaleDateString('am-ET', {
+			: d.toLocaleDateString('en-US', {
 					year: 'numeric',
 					month: 'short',
-					day: 'numeric',
-					calendar: 'ethiopic'
+					day: 'numeric'
 				});
 	}
 

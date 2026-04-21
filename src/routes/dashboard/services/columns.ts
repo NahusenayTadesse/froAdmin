@@ -25,7 +25,7 @@ export const columns = [
 		cell: ({ row }) => {
 			return renderComponent(DataTableLinks, {
 				id: row.original.id,
-				name: row.original.shortDescription,
+				name: row.original.title,
 				link: '/dashboard/services'
 			});
 		}

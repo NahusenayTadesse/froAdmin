@@ -6,7 +6,8 @@
 		User,
 		ShieldUser,
 		KeyRound,
-		UserCheck
+		UserCheck,
+		CalendarClock
 	} from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
@@ -18,8 +19,9 @@
 	const navigation = [
 		{ title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
 		{ title: 'Customers', url: '/dashboard/users', icon: Users },
-		{ title: 'Vendors', url: '/dashboard/vendor', icon: UserCheck },
+		{ title: 'Providers', url: '/dashboard/vendor', icon: UserCheck },
 		{ title: 'Services', url: '/dashboard/services', icon: Toolbox },
+		{ title: 'Bookings', url: '/dashboard/bookings', icon: CalendarClock },
 
 		{
 			title: 'My Account',
