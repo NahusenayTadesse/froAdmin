@@ -4,6 +4,7 @@ import BigText from '$lib/components/Table/bigText.svelte';
 import Statuses from '$lib/components/Table/statuses.svelte';
 import DataTableLinks from '$lib/components/Table/data-table-links.svelte';
 import { formatDate } from '$lib/global.svelte';
+import { Eye, Link } from '@lucide/svelte';
 
 export const columns = [
 	{
@@ -11,6 +12,23 @@ export const columns = [
 		header: '#',
 		cell: (info) => info.row.index + 1,
 		sortable: false
+	},
+	{
+		accessorKey: 'id',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Booking Details',
+				onclick: column.getToggleSortingHandler()
+			}),
+		sortable: true,
+		cell: ({ row }) => {
+			return renderComponent(DataTableLinks, {
+				id: row.original.id,
+				name: 'View Details',
+				link: '/dashboard/bookings/single',
+				IconComp: Link
+			});
+		}
 	},
 	{
 		accessorKey: 'providerName',

@@ -1,6 +1,7 @@
 <script>
 	let { allErrors } = $props();
 	import { CircleAlert } from '@lucide/svelte';
+	import pluralize from 'pluralize';
 </script>
 
 {#if allErrors.length}
@@ -14,8 +15,11 @@
 		</div>
 
 		<ul class="mt-2 ml-4 list-inside list-disc space-y-1 text-sm">
-			{#each allErrors as error}
-				<li class="flex items-center gap-2"><CircleAlert /> {error.messages}</li>
+			{#each allErrors as error (error)}
+				<li class="flex items-center gap-2 capitalize">
+					<CircleAlert />
+					{pluralize(error.path).replace(/([a-z])([A-Z])/g, '$1 $2')}: {error.messages}
+				</li>
 			{/each}
 		</ul>
 	</div>

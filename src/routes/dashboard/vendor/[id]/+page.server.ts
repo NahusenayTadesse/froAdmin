@@ -3,7 +3,7 @@ import { zod4 } from 'sveltekit-superforms/adapters';
 import { editUserSchema as schema } from './schema';
 
 import { db } from '$lib/server/db';
-import { profiles as user, services, serviceCategories } from '$lib/server/db/schema';
+import { profiles as user, services, serviceCategories, wallets } from '$lib/server/db/schema';
 import { eq, sql, getTableColumns } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 import { fail } from 'sveltekit-superforms';
@@ -41,6 +41,13 @@ export const load: PageServerLoad = async ({ params }) => {
 		.leftJoin(serviceCategories, eq(services.categoryId, serviceCategories.id))
 		.where(eq(services.providerId, id));
 
+	const vendorWallets = await db
+		.select()
+		.from(wallets)
+		.where(eq(wallets.userId, id))
+		.limit(1)
+		.then((rows) => rows[0]);
+
 	let form;
 
 	if (singleUser) form = await superValidate(singleUser, zod4(schema));
@@ -59,7 +66,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		banForm,
 		unBanForm,
 		verifyForm,
-		serviceList
+		serviceList,
+		vendorWallets
 	};
 };
 

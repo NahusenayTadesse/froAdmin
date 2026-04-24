@@ -10,7 +10,7 @@
 </script>
 
 <svelte:head>
-	<title>Bookings | {data?.cust?.fullName ?? 'User'}</title>
+	<title>Transactions | {data?.cust?.fullName ?? 'User'}</title>
 </svelte:head>
 
 <div class="mx-auto flex w-full max-w-6xl flex-col justify-start gap-8 p-6">
@@ -22,7 +22,7 @@
 
 		<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 			<div>
-				<h1 class="text-3xl font-bold tracking-tight">Booking History</h1>
+				<h1 class="text-3xl font-bold tracking-tight">Transactions History</h1>
 				<p class="mt-1 text-muted-foreground">
 					Reviewing {data.allTransactions?.length ?? 0} transactions for {data?.cust?.fullName}
 				</p>
@@ -47,7 +47,7 @@
 			<div class="flex size-20 items-center justify-center rounded-full bg-muted">
 				<CalendarDays class="size-10 text-muted-foreground" />
 			</div>
-			<h3 class="mt-6 text-xl font-semibold">No bookings found</h3>
+			<h3 class="mt-6 text-xl font-semibold">No transactions found</h3>
 			<p class="mt-2 mb-8 max-w-sm text-muted-foreground">
 				There are no transactions recorded for the selected date range. Try selecting a different
 				period.
@@ -55,14 +55,14 @@
 			<DateMonth
 				start={data?.start}
 				end={data?.end}
-				link="/dashboard/vendor/{page.params.id}/bookings"
+				link="/dashboard/vendor/{page.params.id}/transactions"
 			/>
 		</div>
 	{:else}
 		<div class="rounded-lg border bg-card shadow-sm">
 			<DataTable
 				data={data.allTransactions}
-				fileName="Booking History - {data?.cust?.fullName}"
+				fileName="Transactions History - {data?.cust?.fullName}"
 				{columns}
 			/>
 		</div>

@@ -11,7 +11,7 @@
 	import { superForm } from 'sveltekit-superforms/client';
 
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
-	import { ArrowLeft, CalendarClock, Pencil, Save } from '@lucide/svelte';
+	import { ArrowLeft, Banknote, CalendarClock, Pencil, Save } from '@lucide/svelte';
 	import SelectComp from '$lib/formComponents/SelectComp.svelte';
 	import type { Snapshot } from '@sveltejs/kit';
 
@@ -104,6 +104,7 @@
 	import Statuses from '$lib/components/Table/statuses.svelte';
 	import Verify from '$lib/forms/Verify.svelte';
 	import { page } from '$app/state';
+	import FormCard from '$lib/formComponents/FormCard.svelte';
 	$effect(() => {
 		if ($message) {
 			if ($message.type === 'error') {
@@ -125,7 +126,10 @@
 	<title>Provider Details</title>
 </svelte:head>
 <SingleView title="Provider Details" class="w-full!">
-	<div class="mt-4 flex w-full flex-row items-start justify-start gap-2 pl-4">
+	<div
+		class="mt-4 flex w-full flex-row flex-wrap
+ items-start justify-start gap-2 pl-4"
+	>
 		<Button onclick={() => (edit = !edit)}>
 			{#if !edit}
 				<Pencil class="h-4 w-4" />
@@ -139,6 +143,10 @@
 
 		<Button href="/dashboard/vendor/{page.params.id}/bookings">
 			<CalendarClock /> Bookings
+		</Button>
+
+		<Button href="/dashboard/vendor/{page.params.id}/transactions">
+			<Banknote /> Transactions
 		</Button>
 
 		{#if data?.singleUser?.banned}
@@ -163,7 +171,62 @@
 			verificationStatus={data.singleUser?.verificationStatus}
 			name="{data.singleUser?.firstName} {data.singleUser?.lastName}"
 		/>
+
+		<div class="mt-6 justify-self-start">
+			<div class="grid gap-4 justify-self-start! md:grid-cols-2 lg:grid-cols-4">
+				<div
+					class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950"
+				>
+					<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Available Balance</p>
+					<div class="mt-2 flex items-baseline gap-1">
+						<h3 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+							${data?.vendorWallets?.balance ?? '0.00'}
+						</h3>
+					</div>
+					<p class="mt-1 text-xs text-slate-400">Ready for withdrawal</p>
+				</div>
+
+				<div
+					class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950"
+				>
+					<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Pending</p>
+					<div class="mt-2 flex items-baseline gap-1">
+						<h3 class="text-2xl font-bold tracking-tight text-amber-600 dark:text-amber-500">
+							${data?.vendorWallets?.pendingBalance ?? '0.00'}
+						</h3>
+					</div>
+					<p class="mt-1 text-xs text-slate-400">In escrow/processing</p>
+				</div>
+
+				<div
+					class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950"
+				>
+					<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Lifetime Earnings</p>
+					<div class="mt-2 flex items-baseline gap-1">
+						<h3 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+							${data?.vendorWallets?.totalEarnings ?? '0.00'}
+						</h3>
+					</div>
+					<p class="mt-1 text-xs font-medium text-emerald-600">
+						Includes tips: ${data?.vendorWallets?.totalTips ?? '0'}
+					</p>
+				</div>
+
+				<div
+					class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950"
+				>
+					<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Withdrawals</p>
+					<div class="mt-2 flex items-baseline gap-1">
+						<h3 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+							${data?.vendorWallets?.totalWithdrawals ?? '0.00'}
+						</h3>
+					</div>
+					<p class="mt-1 text-xs text-slate-400">Transferred to bank</p>
+				</div>
+			</div>
+		</div>
 	</div>
+
 	{#if edit === false}
 		<div class="w-full p-4">
 			<SingleTable
@@ -294,44 +357,24 @@
 
 <br />
 
-<DataTable
-	class="lg:max-w-6xl"
-	data={data?.serviceList}
-	{columns}
-	fileName="{data?.singleUser?.name} Service List"
-/>
-
-{#snippet fe(
-	label = '',
-	name = '',
-	type = '',
-	placeholder = '',
-	required = false,
-	min = '',
-	max = ''
-)}
-	<div class="flex w-full flex-col justify-start gap-2">
-		<Label for={name}>{label}</Label>
-		<Input
-			{type}
-			{name}
-			{placeholder}
-			{required}
-			{min}
-			{max}
-			bind:value={$form[name]}
-			aria-invalid={$errors[name] ? 'true' : undefined}
+<FormCard
+	title="{`${data.singleUser?.firstName ?? ''} ${data.singleUser?.lastName ?? ''}`.trim() ||
+		'Provider'} Services"
+	description="View the full catalog of services offered by this provider."
+	className="w-full! max-w-full!"
+>
+	{#if data?.serviceList?.length > 0}
+		<DataTable
+			class="lg:max-w-6xl"
+			data={data.serviceList}
+			{columns}
+			fileName="{data?.singleUser?.firstName}_{data?.singleUser?.lastName}_Services"
 		/>
-		{#if $errors[name]}
-			<span class="text-red-500">{$errors[name]}</span>
-		{/if}
-	</div>
-{/snippet}
-{#snippet selects(name, items)}
-	<div class="flex w-full flex-col justify-start gap-2">
-		<Label for={name} class="capitalize">{name.replace(/([a-z])([A-Z])/g, '$1 $2')}:</Label>
-
-		<SelectComp {name} bind:value={$form[name]} {items} />
-		{#if $errors[name]}<span class="text-red-500">{$errors[name]}</span>{/if}
-	</div>
-{/snippet}
+	{:else}
+		<div class="flex flex-col items-center justify-center py-12 text-center">
+			<div class="rounded-full bg-slate-50 p-3 dark:bg-slate-900"></div>
+			<p class="mt-2 text-sm font-medium text-slate-900 dark:text-slate-50">No services listed</p>
+			<p class="text-sm text-slate-500">This provider hasn't added any services yet.</p>
+		</div>
+	{/if}
+</FormCard>

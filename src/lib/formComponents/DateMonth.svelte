@@ -68,14 +68,6 @@
 			: 'Pick a date'}
 	</Popover.Trigger>
 	<Popover.Content bind:ref={contentRef} class="w-full p-0">
-		<div class="text-sm text-muted-foreground">
-			Ethiopian Date: <span class="font-semibold text-foreground"
-				>{formatDate(value.start ?? 'Pick a start date') +
-					' - ' +
-					formatDate(value.end ?? 'Pick an end date')}</span
-			>
-		</div>
-
 		<RangeCalendar
 			bind:value
 			class="relative w-auto rounded-lg border pb-16 shadow-sm"
