@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabaseClient'; // Adjust path to your client
+	import Stats from '$lib/components/dashboard/ stats.svelte';
 
 	let { data } = $props();
 	const user = data.session?.user;
@@ -47,8 +48,29 @@
 			channel.unsubscribe();
 		};
 	});
+
+	import { invalidateAll } from '$app/navigation';
+	let lastUpdated = new Date();
+	const REFRESH_INTERVAL = 5000; // 30 seconds
+	onMount(() => {
+		const interval = setInterval(async () => {
+			await invalidateAll();
+			lastUpdated = new Date();
+		}, REFRESH_INTERVAL);
+
+		return () => clearInterval(interval);
+	});
+
+	const formatted = new Date().toISOString().slice(0, 10);
 </script>
 
+<Stats
+	data={data?.dashboard}
+	activeNow={onlineUsers.length}
+	adminInitials="AD"
+	bookingsHref="/dashboard/bookings/{formatted}-{formatted}"
+/>
+<!--
 <div class="p-6">
 	<h2 class="mb-4 text-xl font-bold">Active Users ({onlineUsers.length})</h2>
 
@@ -65,4 +87,4 @@
 			<p class="text-zinc-500">No one else is online...</p>
 		{/each}
 	</ul>
-</div>
+</div> -->
