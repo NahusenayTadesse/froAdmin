@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	const allTransactions = await db
 		.select({
 			id: expenses.id,
-			date: sql<string>`to_char(${expenses.createdAt}, 'DD Mon YYYY')`,
+			date: sql<string>`to_char(${expenses.expenseDate}, 'DD Mon YYYY')`,
 			expensesType: expensesType.name,
 			amount: expenses.total,
 			reason: expenses.description,
@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		.from(expenses)
 		.leftJoin(expensesType, eq(expenses.type, expensesType.id))
 		.leftJoin(user, eq(expenses.createdBy, user.id))
-		.where(between(expenses.createdAt, new Date(start), new Date(end)));
+		.where(between(expenses.expenseDate, start, end));
 	return {
 		allTransactions,
 		start,
