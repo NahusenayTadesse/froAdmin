@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		.leftJoin(services, eq(services.id, bookings.serviceId))
 		.leftJoin(customers, eq(customers.id, bookings.customerId))
 		.leftJoin(providers, eq(providers.id, bookings.providerId))
-		.where(between(bookings.createdAt, new Date(start), new Date(end)))
+		.where(between(bookings.scheduledDate, start, end))
 
 		.orderBy(asc(bookings.createdAt));
 
