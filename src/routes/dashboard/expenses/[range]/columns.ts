@@ -23,7 +23,7 @@ export const columns = [
 			return renderComponent(DataTableLinks, {
 				id: row.original.id,
 				name: formatDate(new Date(row.original.date)),
-				link: '/dashboard/transactions/expenses/single'
+				link: '/dashboard/expenses/single'
 			});
 		}
 	},

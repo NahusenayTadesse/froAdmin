@@ -60,20 +60,20 @@
 					icon: true
 				});
 			}
-		},
-		{
-			accessorKey: '',
-			header: 'Delete',
-			sortable: true,
-			cell: ({ row }) => {
-				// You can pass whatever you need from `row.original` to the component
-				return renderComponent(Delete, {
-					id: row.original.id,
-					action: '?/delete',
-					data: data.deleteForm
-				});
-			}
 		}
+		// {
+		// 	accessorKey: '',
+		// 	header: 'Delete',
+		// 	sortable: true,
+		// 	cell: ({ row }) => {
+		// 		// You can pass whatever you need from `row.original` to the component
+		// 		return renderComponent(Delete, {
+		// 			id: row.original.id,
+		// 			action: '?/delete',
+		// 			data: data.deleteForm
+		// 		});
+		// 	}
+		// }
 	];
 	let { data } = $props();
 	import { superForm } from 'sveltekit-superforms/client';

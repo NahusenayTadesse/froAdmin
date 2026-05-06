@@ -11,8 +11,7 @@
 		{ name: 'Amount', value: 'ETB ' + data.singleTransaction?.amount },
 		{ name: 'Type', value: data.singleTransaction?.type },
 		{ name: 'Reason', value: data.singleTransaction?.reason },
-		{ name: 'Payment Method', value: data.singleTransaction?.paymentMethods },
-		{ name: 'Recieved By', value: data.singleTransaction?.recievedBy }
+		{ name: 'Recieved By', value: data.singleTransaction?.addedBy }
 	]);
 </script>
 
@@ -23,19 +22,6 @@
 	<div class="mt-4 flex w-full flex-row items-start justify-start pl-4">
 		<div class="w-full p-4">
 			<SingleTable {singleTable} />
-			<div class="flex w-full flex-row justify-end gap-2">
-				<Button href="/dashboard/files/{data.singleTransaction?.recieptLink}" target="_blank">
-					<Eye />
-					View Reciept
-				</Button>
-				<Button
-					href="/dashboard/files/{data.singleTransaction.recieptLink}"
-					download="Transaction Reciept"
-				>
-					<Download />
-					Download Reciept
-				</Button>
-			</div>
 		</div>
 	</div></SingleView
 >
