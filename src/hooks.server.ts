@@ -42,6 +42,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 		}
 	}
 
+	event.locals.user = session?.user ? { id: session.user.id } : null;
+
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {
 			return name === 'content-range' || name === 'x-supabase-api-version';

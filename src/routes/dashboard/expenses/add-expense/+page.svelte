@@ -8,14 +8,12 @@
 	import DatePicker2 from '$lib/formComponents/DatePicker2.svelte';
 
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { Plus, Upload, X } from '@lucide/svelte';
+	import { Plus } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { insertExpenseSchema as expensesSchema } from './expenseSchema';
-	import { superForm, fileProxy } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms/client';
 	import SelectComp from '$lib/formComponents/SelectComp.svelte';
-	import FileUpload from '$lib/formComponents/FileUpload.svelte';
-	import ComboboxComp from '$lib/formComponents/ComboboxComp.svelte';
 
 	let { data } = $props();
 
@@ -39,8 +37,6 @@
 			}
 		}
 	});
-
-	const file = fileProxy(form, 'reciept');
 
 	export const snapshot: Snapshot = { capture, restore };
 </script>
@@ -93,14 +89,6 @@
 	{#if $errors[name]}<span class="text-red-500">{$errors[name]}</span>{/if}
 {/snippet}
 
-{#snippet combo(name, items)}
-	<div class="flex w-full flex-col justify-start gap-2">
-		<Label for={name} class="capitalize">{name.replace(/([a-z])([A-Z])/g, '$1 $2')}:</Label>
-
-		<ComboboxComp {name} bind:value={$form[name]} {items} />
-		{#if $errors[name]}<span class="text-red-500">{$errors[name]}</span>{/if}
-	</div>
-{/snippet}
 <Card.Root class="flex w-full flex-col gap-4 lg:w-lg">
 	<Card.Header>
 		<Card.Title class="text-2xl">Add an Expense</Card.Title>
@@ -117,7 +105,6 @@
 		>
 			{@render date('expenseDate', 'Expense Date')}
 			{@render selects('type', data?.categories)}
-			{@render combo('paymentMethod', data?.paymentMethod)}
 
 			<div class="flex w-full flex-col justify-start gap-2">
 				<Label for="description">Expense Description (optional)</Label>
@@ -139,70 +126,6 @@
 				true,
 				'0'
 			)}
-			<!-- <div class="my-8 flex w-full flex-col justify-start gap-2">
-				{#if !$file.length}
-				<Label for="reciept" class="capitalize">Upload Reciept or Screenshot of Sale</Label>{/if}
-
-						<Input
-							type="file"
-							class=" {$file.length ? 'hidden' : ''} "
-							name="receipt"
-							accept="image/*,application/pdf"
-							bind:files={$file}
-							multiple={false}
-						/>
-
-					{#if $file?.length}
-
-					<Label for="reciept" class="capitalize">{$file?.item(0).name}</Label>
-                  <div class="flex flex-row gap-2">
-
-
-					   {#if $file[0].type === 'application/pdf'}
-					      <iframe src={`${URL.createObjectURL($file[0])}#toolbar=0`} class="w-64 h-64" frameborder="0" title="pdf"></iframe>
-					   {:else}
-						<img
-							src={URL.createObjectURL($file[0])}
-							class="h-64 w-64 rounded-md object-cover"
-							alt=""
-						/>
-						{/if}
-						<Button variant="ghost" size="icon" onclick={() => (file.set(undefined))}>
-							<X class="h-4 w-4" />
-						</Button>
-						</div>
-
-					{/if}
-            </div> -->
-			<!-- <div class="flex w-full flex-col justify-start gap-2">
-					<Label for="reciept" class="capitalize">Upload Reciept or Screenshot of Booking Fee</Label>
-					<div class="relative flex flex-row gap-2">
-						<Upload class="absolute top-2 right-16 bottom-0.5 h-6 w-6" />
-						<Input
-							type="file"
-							name="image"
-							accept="image/*,application/pdf"
-							bind:files={$file}
-							multiple={false}
-						/>
-						<Button
-							type="button"
-							size="icon"
-							variant="outline"
-							title="Clear file input"
-							onclick={() => ($file = 0)}
-						>
-							<X />
-						</Button>
-					</div>
-					{#if $errors.reciept}
-						<span class="text-red-500">{$errors.reciept}</span>
-					{/if}
-				</div> -->
-			<FileUpload name="reciept" {form} {errors} />
-			<!-- {#if $errors.reciept}
-						<span class="text-red-500">{$errors.reciept}</span>
-					{/if} -->
 
 			<Button type="submit" class="mt-4" form="main">
 				{#if $delayed}

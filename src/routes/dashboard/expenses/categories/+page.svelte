@@ -1,35 +1,91 @@
-<script lang="ts">
-	import { Input } from '$lib/components/ui/input/index.js';
-	import { Label } from '$lib/components/ui/label/index.js';
-	import { Textarea } from '$lib/components/ui/textarea/index.js';
-	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
-	import { zod4Client } from 'sveltekit-superforms/adapters';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import { Plus } from '@lucide/svelte';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { superForm } from 'sveltekit-superforms';
-	import type { Snapshot } from '@sveltejs/kit';
-	import { positionSchema } from '$lib/ZodSchema.js';
+<script>
+	import { renderComponent } from '$lib/components/ui/data-table/index.js';
 	import DataTable from '$lib/components/Table/data-table.svelte';
-	import { columns } from '$lib/components/CategoryColumns.js';
-
-	let { data } = $props();
-
-	const { form, errors, delayed, enhance, capture, restore, message } = superForm(data.form, {
-		taintedMessage: () => {
-			return new Promise((resolve) => {
-				resolve(window.confirm('Do you want to leave?\nChanges you made may not be saved.'));
-			});
+	import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
+	import Statuses from '$lib/components/Table/statuses.svelte';
+	import DialogComp from '$lib/formComponents/DialogComp.svelte';
+	import { Button } from '$lib/components/ui/button/index';
+	import Edit from './edit.svelte';
+	const columns = [
+		{
+			accessorKey: 'index',
+			header: '#',
+			cell: (info) => info.row.index + 1,
+			sortable: false
+		},
+		{
+			accessorKey: 'name',
+			header: ({ column }) =>
+				renderComponent(DataTableSort, {
+					name: 'Name',
+					onclick: column.getToggleSortingHandler()
+				}),
+			sortable: true,
+			cell: ({ row }) => {
+				// You can pass whatever you need from `row.original` to the component
+				return renderComponent(Edit, {
+					id: row.original.id,
+					name: row.original.name,
+					description: row.original.description,
+					action: '?/edit',
+					data: data?.editForm,
+					icon: false
+				});
+			}
 		},
 
-		validators: zod4Client(positionSchema)
-	});
+		{
+			accessorKey: 'description',
+			header: 'Description',
+			sortable: true,
+			cell: ({ row }) => {
+				return renderComponent(BigText, {
+					text: row.original.description
+				});
+			}
+		},
 
-	export const snapshot: Snapshot = { capture, restore };
+		{
+			accessorKey: '',
+			header: 'Edit',
+			sortable: true,
+			cell: ({ row }) => {
+				// You can pass whatever you need from `row.original` to the component
+				return renderComponent(Edit, {
+					id: row.original.id,
+					name: row.original.name,
+					description: row.original.description,
+					action: '?/edit',
+					data: data?.editForm,
+					icon: true
+				});
+			}
+		},
+		{
+			accessorKey: '',
+			header: 'Delete',
+			sortable: true,
+			cell: ({ row }) => {
+				// You can pass whatever you need from `row.original` to the component
+				return renderComponent(Delete, {
+					id: row.original.id,
+					action: '?/delete',
+					data: data.deleteForm
+				});
+			}
+		}
+	];
+	let { data } = $props();
+	import { superForm } from 'sveltekit-superforms/client';
+	import InputComp from '$lib/formComponents/InputComp.svelte';
+	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
+	import { Plus } from '@lucide/svelte';
 
-	let search = true;
+	const { form, errors, enhance, delayed, message } = superForm(data.form, {});
 
 	import { toast } from 'svelte-sonner';
+	import BigText from '$lib/components/Table/bigText.svelte';
+	import Delete from './delete.svelte';
 	$effect(() => {
 		if ($message) {
 			if ($message.type === 'error') {
@@ -41,70 +97,35 @@
 	});
 </script>
 
-{#snippet fe(
-	label = '',
-	name = '',
-	type = '',
-	placeholder = '',
-	required = false,
-	min = '',
-	max = ''
-)}
-	<div class="flex w-full flex-col justify-start gap-2">
-		<Label for={name}>{label}</Label>
-		<Input
-			{type}
-			{name}
-			{placeholder}
-			{required}
-			{min}
-			{max}
-			bind:value={$form[name]}
-			aria-invalid={$errors[name] ? 'true' : undefined}
-		/>
-		{#if $errors[name]}
-			<span class="text-red-500">{$errors[name]}</span>
-		{/if}
-	</div>
-{/snippet}
+<svelte:head>
+	<title>Expense Types</title>
+</svelte:head>
 
-<div class="grid grid-cols-1 justify-between gap-16 lg:grid-cols-2">
-	<div class="my-8 flex flex-col gap-2">
-		<DataTable data={data.allCategories} {columns} {search} />
-	</div>
+{#key data.allData}
+	<DialogComp title="Add New Expense Type" IconComp={Plus} variant="default">
+		<form action="?/add" use:enhance id="main" class="flex flex-col gap-4" method="post">
+			<InputComp {form} {errors} label="name" type="text" name="name" required={true} />
 
-	<Card.Root class="flex w-full flex-col gap-4 lg:w-lg">
-		<Card.Header>
-			<Card.Title class="text-2xl">Add New Expense Type</Card.Title>
-		</Card.Header>
-		<Card.Content>
-			<form use:enhance action="?/addExpensesType" class="flex flex-col gap-4" method="post">
-				{@render fe('Type Name', 'name', 'text', 'Enter Type Name', true)}
+			<InputComp
+				{form}
+				{errors}
+				label="Description"
+				type="textarea"
+				name="description"
+				placeholder="Enter Category Description"
+				required={true}
+				rows={10}
+			/>
 
-				<div>
-					<Label for="description">Type Description</Label>
+			<Button type="submit" form="main">
+				{#if $delayed}
+					<LoadingBtn name="Adding Expense Type" />
+				{:else}
+					<Plus /> Add Expense Type
+				{/if}
+			</Button>
+		</form>
+	</DialogComp>
 
-					<Textarea
-						name="description"
-						required
-						placeholder="Enter type description"
-						bind:value={$form.description}
-						aria-invalid={$errors.description ? 'true' : undefined}
-					/>
-
-					{#if $errors.description}<span class="text-red-500">{$errors.description}</span>{/if}
-				</div>
-
-				<Button type="submit" class="mt-4">
-					{#if $delayed}
-						<LoadingBtn name="Adding Expense Type" />
-					{:else}
-						<Plus class="h-4 w-4" />
-
-						Add Expense Type
-					{/if}
-				</Button>
-			</form>
-		</Card.Content>
-	</Card.Root>
-</div>
+	<DataTable {columns} data={data?.allData} search={true} />
+{/key}

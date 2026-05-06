@@ -86,7 +86,7 @@
 				There are no expenses recorded for the selected date range. Try selecting a different
 				period.
 			</p>
-			<DateMonth start={data?.start} end={data?.end} link="/dashboard/bookings" />
+			<DateMonth start={data?.start} end={data?.end} link="/dashboard/expenses" />
 		</div>
 	{:else}
 		<div class="rounded-lg border bg-card shadow-sm">

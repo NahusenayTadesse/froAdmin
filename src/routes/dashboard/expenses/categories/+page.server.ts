@@ -1,68 +1,105 @@
-import { setError, superValidate } from 'sveltekit-superforms';
+import { setError, superValidate, message, fail } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
-import { setFlash } from 'sveltekit-flash-message/server';
-
-import { fail } from '@sveltejs/kit';
-
-import { positionSchema as schema } from '$lib/ZodSchema';
+import { eq } from 'drizzle-orm';
+import { add, edit, deleteService } from './schema';
 import { db } from '$lib/server/db';
-import { expensesType } from '$lib/server/db/schema/';
-import type { PageServerLoad, Actions } from './$types.js';
+import { expensesType as paymentMethods } from '$lib/server/db/schema';
+import type { Actions } from './$types';
+import type { PageServerLoad } from './$types.js';
 
 export const load: PageServerLoad = async () => {
-	const form = await superValidate(zod4(schema));
+	const form = await superValidate(zod4(add));
+	const editForm = await superValidate(zod4(edit));
+	const deleteForm = await superValidate(zod4(deleteService));
 
-	const allCategories = await db
+	const allData = await db
 		.select({
-			value: expensesType.id,
-			name: expensesType.name,
-			description: expensesType.description
+			id: paymentMethods.id,
+			name: paymentMethods.name,
+			description: paymentMethods.description
 		})
-		.from(expensesType);
+		.from(paymentMethods);
 
 	return {
 		form,
-		allCategories
+		editForm,
+		deleteForm,
+		allData
 	};
 };
 
 export const actions: Actions = {
-	addExpensesType: async ({ request, cookies }) => {
-		const form = await superValidate(request, zod4(schema));
+	add: async ({ request }) => {
+		const form = await superValidate(request, zod4(add));
 
 		if (!form.valid) {
-			setFlash({ type: 'error', message: 'Please check the form for Errors' }, cookies);
-
-			return fail(400, {
-				form
-			});
+			return message(form, { type: 'error', text: 'Please check the form for Errors' });
 		}
 
 		const { name, description } = form.data;
 
 		try {
-			await db.insert(expensesType).values({ name, description });
+			await db.insert(paymentMethods).values({
+				name,
+				description
+			});
 
-			setFlash({ type: 'success', message: `Expense Category created successfully!` }, cookies);
-			return message(form, { type: 'success', text: 'Expense Category created successfully!' });
+			return message(form, { type: 'success', text: 'Category Successfully Created' });
 		} catch (err: any) {
-			setFlash(
+			if (err.code === 'ER_DUP_ENTRY') setError(form, 'name', 'Category already exists.');
+			return message(form, {
+				type: 'error',
+				text:
+					err.code === 'ER_DUP_ENTRY'
+						? 'Service is already taken. Please choose another one.'
+						: err.message
+			});
+		}
+	},
+	edit: async ({ request }) => {
+		const form = await superValidate(request, zod4(edit));
+
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		const { id, name, description } = form.data;
+
+		try {
+			await db.update(paymentMethods).set({ name, description }).where(eq(paymentMethods.id, id));
+			return message(form, { type: 'success', text: 'Expenses Type Successfully Updated' });
+		} catch (err: any) {
+			if (err.code === 'ER_DUP_ENTRY') return setError(form, 'name', 'Category already exists.');
+			return message(form, {
+				type: 'error',
+				text:
+					err.code === 'ER_DUP_ENTRY'
+						? 'Expenses Type   is already taken. Please choose another one.'
+						: err.message
+			});
+		}
+	},
+	delete: async ({ request }) => {
+		const form = await superValidate(request, zod4(deleteService));
+
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		const { id } = form.data;
+
+		try {
+			await db.delete(paymentMethods).where(eq(paymentMethods.id, id));
+			return message(form, { type: 'success', text: 'Expenses Type Successfully Deleted' });
+		} catch (err: any) {
+			return message(
+				form,
 				{
 					type: 'error',
-					message:
-						err.code === 'ER_DUP_ENTRY'
-							? 'Positions Name is already taken. Please choose another one.'
-							: err.message
+					text: 'Error while deleting category.'
 				},
-				cookies
+				{ status: 500 }
 			);
-
-			if (err.code === 'ER_DUP_ENTRY') {
-				return setError(form, 'name', 'Category Name already exists.');
-				return message(form, { type: 'error', text: 'Category Name already exists.' });
-			} else {
-				return message(form, { type: 'error', text: err.message });
-			}
 		}
 	}
-} satisfies Actions;
+};

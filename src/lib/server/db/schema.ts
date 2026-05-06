@@ -295,7 +295,7 @@ export const expenses = pgTable('expenses', {
 	type: uuid('type')
 		.notNull()
 		.references(() => expensesType.id),
-	createdBy: uuid('type')
+	createdBy: uuid('created_by')
 		.notNull()
 		.references(() => adminUsers.id),
 	description: text('description'),

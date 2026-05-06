@@ -6,6 +6,7 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			supabase: SupabaseClient;
+			user: { id: string } | null;
 		}
 		// interface PageState {}
 		// interface Platform {}
