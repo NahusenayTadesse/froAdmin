@@ -29,6 +29,16 @@ export const columns = [
 	},
 
 	{
+		accessorKey: 'expenseType',
+		header: ({ column }) =>
+			renderComponent(DataTableSort, {
+				name: 'Expense Type',
+				onclick: column.getToggleSortingHandler()
+			}),
+
+		sortable: true
+	},
+	{
 		accessorKey: 'amount',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
@@ -36,14 +46,17 @@ export const columns = [
 				onclick: column.getToggleSortingHandler()
 			}),
 
-		sortable: true
+		sortable: true,
+		cell: ({ row }) => {
+			return '$ ' + row.original.amount;
+		}
 	},
 
 	{
 		accessorKey: 'addedBy',
 		header: ({ column }) =>
 			renderComponent(DataTableSort, {
-				name: 'Recieved By',
+				name: 'Added By',
 				onclick: column.getToggleSortingHandler()
 			}),
 

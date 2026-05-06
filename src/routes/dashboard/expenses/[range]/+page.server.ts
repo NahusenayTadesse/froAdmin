@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		.select({
 			id: expenses.id,
 			date: sql<string>`to_char(${expenses.expenseDate}, 'DD Mon YYYY')`,
-			expensesType: expensesType.name,
+			expenseType: expensesType.name,
 			amount: expenses.total,
 			reason: expenses.description,
 			addedBy: sql<string>`concat(${user.firstName}, ' ', ${user.lastName})`,

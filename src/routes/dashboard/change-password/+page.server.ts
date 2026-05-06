@@ -1,12 +1,9 @@
-import { fail, redirect } from '@sveltejs/kit';
-import { db } from '$lib/server/db';
-import { eq } from 'drizzle-orm';
+import { fail } from '@sveltejs/kit';
 
 import { superValidate, message } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { changePasswordSchema as schema } from './schema';
 import type { Actions, PageServerLoad } from './$types';
-import { setFlash } from 'sveltekit-flash-message/server';
 
 export const load: PageServerLoad = async () => {
 	const form = await superValidate(zod4(schema));
