@@ -1,6 +1,6 @@
 {
-  "id": "c3dcc488-b499-45a6-8769-11dcd2a4e117",
-  "prevId": "c887dfc1-c3c5-4551-b400-45787bb6a268",
+  "id": "c7c3ea66-e209-4d58-9651-4e2afc5f782f",
+  "prevId": "6ab9b37a-7088-4438-abe9-87286d145bae",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -485,6 +485,20 @@
           "type": "numeric(10, 2)",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -493,6 +507,19 @@
           "name": "expenses_type_expenses_type_id_fk",
           "tableFrom": "expenses",
           "tableTo": "expenses_type",
+          "columnsFrom": [
+            "type"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "expenses_type_admin_users_id_fk": {
+          "name": "expenses_type_admin_users_id_fk",
+          "tableFrom": "expenses",
+          "tableTo": "admin_users",
           "columnsFrom": [
             "type"
           ],

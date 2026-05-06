@@ -1,0 +1,1 @@
+ALTER TABLE "expenses" ADD CONSTRAINT "expenses_type_admin_users_id_fk" FOREIGN KEY ("type") REFERENCES "public"."admin_users"("id") ON DELETE no action ON UPDATE no action;

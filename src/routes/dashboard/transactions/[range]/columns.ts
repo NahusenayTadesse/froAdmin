@@ -43,6 +43,7 @@ export const columns = [
 			});
 		}
 	},
+
 	{
 		accessorKey: 'createdAt',
 		header: ({ column }) =>

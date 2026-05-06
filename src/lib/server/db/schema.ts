@@ -288,3 +288,24 @@ export const bookingLiveLocations = pgTable('booking_live_locations', {
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 });
+
+export const expenses = pgTable('expenses', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	expenseDate: date('expense_date').notNull(),
+	type: uuid('type')
+		.notNull()
+		.references(() => expensesType.id),
+	createdBy: uuid('type')
+		.notNull()
+		.references(() => adminUsers.id),
+	description: text('description'),
+	total: numeric('total', { precision: 10, scale: 2 }).notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+});
+
+export const expensesType = pgTable('expenses_type', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	name: text('name').notNull().unique(),
+	description: text('description')
+});

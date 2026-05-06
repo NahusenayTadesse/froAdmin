@@ -7,7 +7,11 @@ CREATE TABLE "admin_users" (
 	"created_by" uuid NOT NULL,
 	"role_id" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now(),
-	"updated_at" timestamp with time zone DEFAULT now()
+	"updated_at" timestamp with time zone DEFAULT now(),
+	"banned" boolean,
+	"ban_reason" text,
+	"banned_at" timestamp with time zone,
+	"banned_by" uuid
 );
 --> statement-breakpoint
 CREATE TABLE "booking_live_locations" (
@@ -96,6 +100,10 @@ CREATE TABLE "profiles" (
 	"updated_at" timestamp with time zone DEFAULT now(),
 	"version" bigint,
 	"stripe_customer_id" text,
+	"banned" boolean,
+	"ban_reason" text,
+	"banned_at" timestamp with time zone,
+	"banned_by" uuid,
 	CONSTRAINT "profiles_stripe_customer_id_unique" UNIQUE("stripe_customer_id")
 );
 --> statement-breakpoint
@@ -126,7 +134,8 @@ CREATE TABLE "service_categories" (
 	"updated_at" timestamp with time zone DEFAULT now(),
 	"allow_images" boolean DEFAULT true NOT NULL,
 	"requires_before_image" boolean DEFAULT false NOT NULL,
-	"requires_after_image" boolean DEFAULT false NOT NULL
+	"requires_after_image" boolean DEFAULT false NOT NULL,
+	"status" boolean DEFAULT true NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "services" (

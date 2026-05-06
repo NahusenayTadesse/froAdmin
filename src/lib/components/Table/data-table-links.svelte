@@ -25,7 +25,7 @@
 	{target}
 	{variant}
 	{...restProps}
-	class="wrap-break-words items-end! justify-start!  {variant === 'ghost' ? 'pl-0' : ''}"
+	class="wrap-break-words  justify-start!  {variant === 'ghost' ? 'pl-0' : ''}"
 >
 	{#if IconComp}
 		<IconComp class="size-4" />

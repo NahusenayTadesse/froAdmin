@@ -54,7 +54,7 @@
 </script>
 
 <svelte:head>
-	<title>Bookings</title>
+	<title>Expenses</title>
 </svelte:head>
 
 <div class="mx-auto flex w-full max-w-6xl flex-col justify-start gap-8 p-6">
@@ -62,12 +62,12 @@
 		<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 			<div>
 				<p class="mt-1 text-muted-foreground">
-					Reviewing {data.allTransactions?.length ?? 0} bookings
+					Reviewing {data.allTransactions?.length ?? 0} expenses
 				</p>
 			</div>
 
 			<div class="flex items-center gap-2">
-				<DateMonth start={data?.start} end={data?.end} link="/dashboard/bookings" />
+				<DateMonth start={data?.start} end={data?.end} link="/dashboard/expenses" />
 			</div>
 		</div>
 	</div>
@@ -81,9 +81,9 @@
 			<div class="flex size-20 items-center justify-center rounded-full bg-muted">
 				<CalendarDays class="size-10 text-muted-foreground" />
 			</div>
-			<h3 class="mt-6 text-xl font-semibold">No bookings found</h3>
+			<h3 class="mt-6 text-xl font-semibold">No expenses found</h3>
 			<p class="mt-2 mb-8 max-w-sm text-muted-foreground">
-				There are no transactions recorded for the selected date range. Try selecting a different
+				There are no expenses recorded for the selected date range. Try selecting a different
 				period.
 			</p>
 			<DateMonth start={data?.start} end={data?.end} link="/dashboard/bookings" />
@@ -93,16 +93,7 @@
 			<FilterMenu
 				bind:filteredList
 				data={data?.allTransactions}
-				filterKeys={[
-					'customerName',
-					'providerName',
-					'serviceName',
-					'scheduledStartTime',
-					'scheduledEndTime',
-					'bookingStatus',
-					'paymentStatus',
-					'totalPrice'
-				]}
+				filterKeys={['amount', 'expenseType', 'date', 'addedBy']}
 			/>
 			<DataTable data={filteredList} fileName="Bookings  {data?.start} - {data?.end}" {columns} />
 		</div>

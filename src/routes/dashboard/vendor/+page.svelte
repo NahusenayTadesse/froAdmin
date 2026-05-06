@@ -30,7 +30,11 @@
 		data={data?.userList}
 		bind:filteredList
 		filterKeys={[
-			'role',
+			'locationCity',
+			'locationState',
+			'locationCountry',
+			'ratingAverage',
+			'ratingCount',
 			'status',
 			'isVerifiedProvider',
 			'verificationStatus',

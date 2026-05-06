@@ -7,7 +7,9 @@
 		ShieldUser,
 		KeyRound,
 		UserCheck,
-		CalendarClock
+		CalendarClock,
+		Banknote,
+		BanknoteArrowDown
 	} from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
@@ -22,6 +24,8 @@
 		{ title: 'Providers', url: '/dashboard/vendor', icon: UserCheck },
 		{ title: 'Services', url: '/dashboard/services', icon: Toolbox },
 		{ title: 'Bookings', url: '/dashboard/bookings', icon: CalendarClock },
+		{ title: 'Transactions', url: '/dashboard/transactions', icon: Banknote },
+		{ title: 'Expenses', url: '/dashboard/expenses', icon: BanknoteArrowDown },
 
 		{
 			title: 'My Account',
