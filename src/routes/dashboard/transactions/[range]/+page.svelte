@@ -17,7 +17,7 @@
 	<title>Transactions</title>
 </svelte:head>
 
-<div class="mx-auto flex w-full max-w-6xl flex-col justify-start gap-8 p-6">
+<div class="mx-auto flex w-full flex-col justify-start gap-8 p-6">
 	<div class="flex flex-col gap-4">
 		<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 			<div>

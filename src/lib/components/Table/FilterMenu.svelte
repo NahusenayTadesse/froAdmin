@@ -9,7 +9,10 @@
 		BarChart2,
 		PieChart,
 		TrendingUp,
-		Activity
+		Activity,
+		ChartArea,
+		ChartPie,
+		ChartColumnBig
 	} from '@lucide/svelte';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
@@ -36,9 +39,10 @@
 		data: any[];
 		filterKeys: string[];
 		filteredList?: any[];
+		class?: string;
 	}
 
-	let { data, filterKeys, filteredList = $bindable(data) }: Props = $props();
+	let { data, filterKeys, filteredList = $bindable(data), class: className = '' }: Props = $props();
 
 	// ── Chart type selector ──────────────────────────────────────────────────
 	const CHART_TYPES: { value: ChartType; label: string }[] = [
@@ -50,13 +54,14 @@
 		{ value: 'radar', label: 'Radar' }
 	];
 
-	let type = $state<ChartType>('bar');
+	let type = $state<ChartType>();
 	let chartTypeOpen = $state(false);
 
 	// ── State ───────────────────────────────────────────────────────────────
 	let selectedFilters = $state<Record<string, string[]>>({});
 	let filtersOpen = $state(false);
-	let activeChartKey = $state<string>(filterKeys[0] ?? '');
+	let chartOpen = $state(false);
+	let activeChartKey = $derived<string>(filterKeys[0] ?? '');
 	let chartCanvases = $state<Record<string, HTMLCanvasElement | null>>({});
 	let chartInstances: Record<string, any> = {};
 
@@ -167,7 +172,8 @@
 			},
 			tooltip: {
 				callbacks: {
-					label: (ctx: any) => ` ${ctx.label}: ${ctx.parsed.y ?? ctx.parsed} items`
+					label: (ctx: any) =>
+						` ${ctx.label}: ${filteredList.filter((c) => c[key] === ctx.label)?.length} items`
 				}
 			}
 		},
@@ -241,77 +247,69 @@
 
 	// ── Icon helper ──────────────────────────────────────────────────────────
 	const chartTypeIcon = (t: ChartType) => {
-		if (t === 'pie' || t === 'doughnut') return PieChart;
+		if (t === 'pie' || t === 'doughnut') return ChartPie;
 		if (t === 'line') return TrendingUp;
 		if (t === 'radar' || t === 'polarArea') return Activity;
-		return BarChart2;
+		return ChartColumnBig;
 	};
 	const ChartIcon = $derived(chartTypeIcon(type));
 </script>
 
 <!-- ── Toolbar ────────────────────────────────────────────────────────────── -->
-<div class="flex flex-wrap items-center gap-2">
+<div class="flex {className} flex-wrap items-center gap-2">
 	<!-- Filter toggle -->
-	<Tooltip.Provider>
-		<Tooltip.Root>
-			<Tooltip.Trigger class={buttonVariants({ variant: 'outline' })}>
-				{#snippet child(props)}
-					<Button onclick={() => (filtersOpen = !filtersOpen)} class="w-40" {...props}>
-						{#if filtersOpen}
-							<X class="size-4" />
-						{:else}
-							<SlidersHorizontal class="size-4" />
-						{/if}
-						Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
-					</Button>
-				{/snippet}
-			</Tooltip.Trigger>
-			<Tooltip.Content><p>Filter Charts</p></Tooltip.Content>
-		</Tooltip.Root>
-	</Tooltip.Provider>
 
-	<!-- Chart type picker -->
-	<Popover.Root bind:open={chartTypeOpen}>
-		<Popover.Trigger class={buttonVariants({ variant: 'outline' })}>
-			{#snippet child({ props })}
-				<Button variant="outline" class="w-44 justify-between" {...props}>
-					<span class="flex items-center gap-2">
-						<ChartIcon class="size-4 text-primary" />
-						<span>{CHART_TYPES.find((c) => c.value === type)?.label ?? 'Chart Type'}</span>
-					</span>
-					<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-				</Button>
-			{/snippet}
-		</Popover.Trigger>
-		<Popover.Content class="w-44 p-0">
-			<Command.Root>
-				<Command.List>
-					<Command.Group>
-						{#each CHART_TYPES as ct}
-							<Command.Item
-								value={ct.value}
-								onSelect={() => {
-									type = ct.value;
-									chartTypeOpen = false;
+	<div class="items-between flex w-full flex-row flex-wrap justify-between">
+		<Tooltip.Provider>
+			<Tooltip.Root>
+				<Tooltip.Trigger class={buttonVariants({ variant: 'outline' })}>
+					{#snippet child(props)}
+						<Button onclick={() => (filtersOpen = !filtersOpen)} class="w-40" {...props}>
+							{#if filtersOpen}
+								<X class="size-4" />
+							{:else}
+								<SlidersHorizontal class="size-4" />
+							{/if}
+							Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
+						</Button>
+					{/snippet}
+				</Tooltip.Trigger>
+				<Tooltip.Content><p>Filter Charts</p></Tooltip.Content>
+			</Tooltip.Root>
+		</Tooltip.Provider>
+		<div>
+			<Tooltip.Provider>
+				<Tooltip.Root>
+					<Tooltip.Trigger class={buttonVariants({ variant: 'outline' })}>
+						{#snippet child(props)}
+							<Button
+								onclick={() => {
+									chartOpen = !chartOpen;
+									type = 'bar';
 								}}
-								class="flex cursor-pointer items-center gap-2"
+								class="w-40"
+								{...props}
 							>
-								<Check
-									class="size-4 {type === ct.value ? 'text-primary opacity-100' : 'opacity-0'}"
-								/>
-								{ct.label}
-							</Command.Item>
-						{/each}
-					</Command.Group>
-				</Command.List>
-			</Command.Root>
-		</Popover.Content>
-	</Popover.Root>
+								{#if chartOpen}
+									<X class="size-4" />
+								{:else}
+									<ChartArea class="size-4" />
+								{/if}
+								Chart {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
+							</Button>
+						{/snippet}
+					</Tooltip.Trigger>
+					<Tooltip.Content><p>Filter Charts</p></Tooltip.Content>
+				</Tooltip.Root>
+			</Tooltip.Provider>
+		</div>
+	</div>
+	<!-- Chart type picker -->
 </div>
 
 <!-- ── Filter panel ───────────────────────────────────────────────────────── -->
 {#if filtersOpen}
-	<div class="mt-4 w-full" transition:fly={{ x: -100, duration: 300 }}>
+	<div class="mt-4" transition:fly={{ x: -100, duration: 300 }}>
 		<Card class="w-full">
 			<CardHeader>
 				<CardTitle>Filter Charts</CardTitle>
@@ -442,68 +440,109 @@
 {/if}
 
 <!-- ── Chart tabs ─────────────────────────────────────────────────────────── -->
-<div class="mt-6 w-full space-y-4">
-	<!-- tab strip -->
-	<div class="flex gap-2 overflow-x-auto rounded-xl border border-border bg-muted/30 p-1">
-		{#each filterKeys as key (key)}
-			<button
-				class="flex shrink-0 items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200
+{#if chartOpen}
+	<div class="mt-6 space-y-4" transition:fly={{ x: 100, duration: 300 }}>
+		<Popover.Root bind:open={chartTypeOpen}>
+			<Popover.Trigger class={buttonVariants({ variant: 'outline' })}>
+				{#snippet child({ props })}
+					<Button variant="outline" class="w-44 justify-between" {...props}>
+						<span class="flex items-center gap-2">
+							<ChartIcon class="size-4 text-primary" />
+							<span>{CHART_TYPES.find((c) => c.value === type)?.label ?? 'Chart Type'}</span>
+						</span>
+						<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+					</Button>
+				{/snippet}
+			</Popover.Trigger>
+			<Popover.Content class="w-44 p-0">
+				<Command.Root>
+					<Command.List>
+						<Command.Group>
+							{#each CHART_TYPES as ct}
+								<Command.Item
+									value={ct.value}
+									onSelect={() => {
+										type = ct.value;
+										chartTypeOpen = false;
+									}}
+									class="flex cursor-pointer items-center gap-2"
+								>
+									<Check
+										class="size-4 {type === ct.value ? 'text-primary opacity-100' : 'opacity-0'}"
+									/>
+									{ct.label}
+								</Command.Item>
+							{/each}
+						</Command.Group>
+					</Command.List>
+				</Command.Root>
+			</Popover.Content>
+		</Popover.Root>
+
+		<!-- tab strip -->
+		<div class="flex gap-2 overflow-x-auto rounded-xl border border-border bg-muted/30 p-1">
+			{#each filterKeys as key (key)}
+				<button
+					class="flex shrink-0 items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200
 					{activeChartKey === key
-					? 'bg-background text-foreground shadow-sm'
-					: 'text-muted-foreground hover:text-foreground'}"
-				onclick={() => (activeChartKey = key)}
-			>
-				<ChartIcon class="size-4" />
-				{humanLabel(key)}
-				{#if selectedFilters[key]?.length > 0}
-					<Badge variant="secondary" class="ml-1 px-1.5 py-0 text-xs">
-						{selectedFilters[key].length}
-					</Badge>
-				{/if}
-			</button>
+						? 'bg-background text-foreground shadow-sm'
+						: 'text-muted-foreground hover:text-foreground'}"
+					onclick={() => (activeChartKey = key)}
+				>
+					<ChartIcon class="size-4" />
+					{humanLabel(key)}
+					{#if selectedFilters[key]?.length > 0}
+						<Badge variant="secondary" class="ml-1 px-1.5 py-0 text-xs">
+							{selectedFilters[key].length}
+						</Badge>
+					{/if}
+				</button>
+			{/each}
+		</div>
+
+		<!-- chart panels — all rendered but only active one is visible (keeps Chart.js instances alive) -->
+		{#each filterKeys as key (key)}
+			<div class={activeChartKey === key ? 'block' : 'hidden'}>
+				<Card class="w-full">
+					<CardHeader>
+						<div class="flex items-center justify-between">
+							<div>
+								<CardTitle class="flex items-center gap-2">
+									<ChartIcon class="size-5 text-primary" />
+									{humanLabel(key)}
+								</CardTitle>
+								<CardDescription class="mt-1">
+									Distribution of {humanLabel(key).toLowerCase()} across
+									{filteredList.length} record{filteredList.length !== 1 ? 's' : ''}
+									{#if selectedFilters[key]?.length > 0}
+										· <span class="text-primary"
+											>{selectedFilters[key].length} value{selectedFilters[key].length > 1
+												? 's'
+												: ''} highlighted</span
+										>
+									{/if}
+								</CardDescription>
+							</div>
+							<Badge variant="outline" class="capitalize">{type}</Badge>
+						</div>
+					</CardHeader>
+					<CardContent>
+						<!-- tip: click a bar/slice to toggle that filter -->
+						{#if type === 'bar' || type === 'line'}
+							<p class="mb-3 text-xs text-muted-foreground">
+								💡 Click a bar to toggle that value as a filter
+							</p>
+						{:else}
+							<p class="mb-3 text-xs text-muted-foreground">
+								💡 Click a segment to toggle that value as a filter
+							</p>
+						{/if}
+						<div class="relative h-72 w-full">
+							<canvas bind:this={chartCanvases[key]}></canvas>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
 		{/each}
 	</div>
-
-	<!-- chart panels — all rendered but only active one is visible (keeps Chart.js instances alive) -->
-	{#each filterKeys as key (key)}
-		<div class={activeChartKey === key ? 'block' : 'hidden'}>
-			<Card class="w-full">
-				<CardHeader>
-					<div class="flex items-center justify-between">
-						<div>
-							<CardTitle class="flex items-center gap-2">
-								<ChartIcon class="size-5 text-primary" />
-								{humanLabel(key)}
-							</CardTitle>
-							<CardDescription class="mt-1">
-								Distribution of {humanLabel(key).toLowerCase()} across
-								{filteredList.length} record{filteredList.length !== 1 ? 's' : ''}
-								{#if selectedFilters[key]?.length > 0}
-									· <span class="text-primary"
-										>{selectedFilters[key].length} value{selectedFilters[key].length > 1 ? 's' : ''} highlighted</span
-									>
-								{/if}
-							</CardDescription>
-						</div>
-						<Badge variant="outline" class="capitalize">{type}</Badge>
-					</div>
-				</CardHeader>
-				<CardContent>
-					<!-- tip: click a bar/slice to toggle that filter -->
-					{#if type === 'bar' || type === 'line'}
-						<p class="mb-3 text-xs text-muted-foreground">
-							💡 Click a bar to toggle that value as a filter
-						</p>
-					{:else}
-						<p class="mb-3 text-xs text-muted-foreground">
-							💡 Click a segment to toggle that value as a filter
-						</p>
-					{/if}
-					<div class="relative h-72 w-full">
-						<canvas bind:this={chartCanvases[key]}></canvas>
-					</div>
-				</CardContent>
-			</Card>
-		</div>
-	{/each}
-</div>
+{/if}

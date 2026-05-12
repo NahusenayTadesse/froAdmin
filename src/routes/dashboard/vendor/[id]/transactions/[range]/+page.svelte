@@ -13,7 +13,7 @@
 	<title>Transactions | {data?.cust?.fullName ?? 'User'}</title>
 </svelte:head>
 
-<div class="mx-auto flex w-full max-w-6xl flex-col justify-start gap-8 p-6">
+<div class="mx-auto flex w-full flex-col justify-start gap-8 p-6">
 	<div class="flex flex-col gap-4">
 		<Button href="/dashboard/vendor/{page.params.id}" class="w-fit gap-2 ">
 			<ArrowLeft class="size-4" />

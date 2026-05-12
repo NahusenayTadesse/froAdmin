@@ -365,7 +365,6 @@
 >
 	{#if data?.serviceList?.length > 0}
 		<DataTable
-			class="lg:max-w-6xl"
 			data={data.serviceList}
 			{columns}
 			fileName="{data?.singleUser?.firstName}_{data?.singleUser?.lastName}_Services"

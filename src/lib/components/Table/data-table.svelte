@@ -165,7 +165,7 @@
 </div> -->
 <Resizable.PaneGroup
 	direction="horizontal"
-	class="lg:max-w-8xl mt-4 flex w-full min-w-full gap-0 rounded-lg lg:w-fit lg:min-w-2xl {className}"
+	class="mt-4 flex w-full min-w-full gap-0 rounded-lg lg:w-fit lg:min-w-2xl {className}"
 >
 	<Resizable.Pane
 		defaultSize={isMobile()

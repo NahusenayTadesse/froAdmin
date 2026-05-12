@@ -131,5 +131,5 @@
 		bind:filteredList
 		filterKeys={['role', 'status', 'email', 'isOnline', 'device', 'location', 'lastSeen']}
 	/>
-	<DataTable data={filteredList} class="lg:w-6xl!" {columns} fileName="Users List" />
+	<DataTable data={filteredList} {columns} fileName="Users List" />
 {/if}

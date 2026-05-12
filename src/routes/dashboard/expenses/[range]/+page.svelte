@@ -5,7 +5,6 @@
 	import FilterMenu from '$lib/components/Table/FilterMenu.svelte';
 
 	import { CalendarDays } from '@lucide/svelte';
-	import Piechart from '$lib/components/piechart.svelte';
 
 	let { data } = $props();
 

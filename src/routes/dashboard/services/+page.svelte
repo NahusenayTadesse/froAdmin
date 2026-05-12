@@ -6,7 +6,7 @@
 	import { columns } from './columns';
 
 	import FilterMenu from '$lib/components/Table/FilterMenu.svelte';
-	import Datachart from '$lib/components/datachart.svelte';
+	// import Datachart from '$lib/components/datachart.svelte';
 
 	let filteredList = $derived(data.allData);
 </script>
@@ -16,7 +16,7 @@
 </svelte:head>
 
 {#key data.allData}
-	<!-- <FilterMenu
+	<FilterMenu
 		data={data.allData}
 		bind:filteredList
 		filterKeys={[
@@ -34,10 +34,10 @@
 			'requiresBeforeImage',
 			'requiresAfterImage'
 		]}
-	/> -->
+	/>
 
-	<div class="max-w-6xl">
-		<Datachart
+	<div>
+		<!-- <Datachart
 			data={data.allData}
 			bind:filteredList
 			filterKeys={[
@@ -55,13 +55,7 @@
 				'requiresBeforeImage',
 				'requiresAfterImage'
 			]}
-		/>
+		/> -->
 	</div>
-	<DataTable
-		{columns}
-		class="lg:max-w-6xl"
-		data={filteredList}
-		search={true}
-		fileName="Service List"
-	/>
+	<DataTable {columns} data={filteredList} search={true} fileName="Service List" />
 {/key}

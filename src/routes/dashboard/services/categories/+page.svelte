@@ -278,11 +278,5 @@
 	</form>
 </DialogComp>
 {#key data.allData}
-	<DataTable
-		{columns}
-		class="lg:max-w-6xl!"
-		data={data?.allData}
-		search={true}
-		fileName="Service Categories"
-	/>
+	<DataTable {columns} data={data?.allData} search={true} fileName="Service Categories" />
 {/key}

@@ -42,5 +42,5 @@
 			'banned'
 		]}
 	/>
-	<DataTable data={filteredList} {columns} fileName="Users List" class="max-w-6xl!" />
+	<DataTable data={filteredList} {columns} fileName="Users List" />
 {/if}
