@@ -19,9 +19,10 @@
 	});
 
 	import { Toaster, toast } from 'svelte-sonner';
-	import { ProgressBar } from '@prgm/sveltekit-progress-bar';
+	// import { ProgressBar } from '@prgm/sveltekit-progress-bar';
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page, updated } from '$app/state';
+	import NavigationProgress from '$lib/components/NavigationProgress.svelte';
 
 	const flash = getFlash(page, { clearAfterMs: 5000 });
 
@@ -39,6 +40,8 @@
 <!-- src/routes/+layout.svelte -->
 <svelte:head><title>Fro Admin</title></svelte:head>
 <ModeWatcher />
-<ProgressBar color="#7F57F1" />
+<!-- <ProgressBar color="#7F57F1" /> -->
+
+<NavigationProgress />
 <Toaster position="bottom-right" richColors />
 {@render children()}
