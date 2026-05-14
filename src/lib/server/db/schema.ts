@@ -309,3 +309,5 @@ export const expensesType = pgTable('expenses_type', {
 	name: text('name').notNull().unique(),
 	description: text('description')
 });
+
+export * from './afflaite';

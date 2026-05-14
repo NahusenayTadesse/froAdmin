@@ -1,7 +1,7 @@
 <script>
 	let { allErrors } = $props();
 	import { CircleAlert } from '@lucide/svelte';
-	import pluralize from 'pluralize';
+	import { pluralize } from '$lib/hooks/pluralize';
 </script>
 
 {#if allErrors.length}
