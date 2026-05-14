@@ -7,12 +7,13 @@ import {
 	jsonb,
 	numeric,
 	integer,
+	doublePrecision,
 	check,
 	date
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
-import { profiles } from './schema';
+import { profiles, bookings } from './schema';
 
 export const providerLedgerEntries = pgTable(
 	'provider_ledger_entries',
@@ -64,8 +65,12 @@ export const affiliateProfiles = pgTable('affiliate_profiles', {
 	holdDays: integer('hold_days').notNull().default(30),
 	minimumWithdrawalAmount: numeric('minimum_withdrawal_amount').notNull().default('10.00'),
 	payoutCurrency: text('payout_currency').notNull().default('usd'),
-	payoutDetails: jsonb('payout_details').notNull().default({}),
-	metadata: jsonb('metadata').notNull().default({}),
+	payoutDetails: jsonb('payout_details')
+		.notNull()
+		.default(sql`'{}'::jsonb`),
+	metadata: jsonb('metadata')
+		.notNull()
+		.default(sql`'{}'::jsonb`),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 });
@@ -80,7 +85,9 @@ export const affiliateCodes = pgTable('affiliate_codes', {
 	isActive: boolean('is_active').notNull().default(true),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-	metadata: jsonb('metadata').notNull().default({})
+	metadata: jsonb('metadata')
+		.notNull()
+		.default(sql`'{}'::jsonb`)
 });
 
 // 3. Affiliate Payout Batches
@@ -90,7 +97,9 @@ export const affiliatePayoutBatches = pgTable('affiliate_payout_batches', {
 	periodEnd: date('period_end').notNull(),
 	currency: text('currency').notNull().default('usd'),
 	status: text('status').notNull().default('draft'),
-	metadata: jsonb('metadata').notNull().default({}),
+	metadata: jsonb('metadata')
+		.notNull()
+		.default(sql`'{}'::jsonb`),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	processedAt: timestamp('processed_at', { withTimezone: true })
 });
@@ -115,7 +124,9 @@ export const affiliateCommissionEvents = pgTable('affiliate_commission_events', 
 	status: text('status').notNull().default('pending_hold'),
 	payableAfter: timestamp('payable_after', { withTimezone: true }),
 	payoutBatchId: uuid('payout_batch_id').references(() => affiliatePayoutBatches.id),
-	metadata: jsonb('metadata').notNull().default({}),
+	metadata: jsonb('metadata')
+		.notNull()
+		.default(sql`'{}'::jsonb`),
 	occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 });
@@ -134,7 +145,9 @@ export const affiliatePayoutItems = pgTable('affiliate_payout_items', {
 	netAmount: numeric('net_amount').notNull(),
 	currency: text('currency').notNull().default('usd'),
 	status: text('status').notNull().default('locked'),
-	metadata: jsonb('metadata').notNull().default({}),
+	metadata: jsonb('metadata')
+		.notNull()
+		.default(sql`'{}'::jsonb`),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 });
 
@@ -150,7 +163,9 @@ export const affiliateWalletTransactions = pgTable('affiliate_wallet_transaction
 	referenceType: text('reference_type'),
 	referenceId: text('reference_id'),
 	note: text('note'),
-	metadata: jsonb('metadata').notNull().default({}),
+	metadata: jsonb('metadata')
+		.notNull()
+		.default(sql`'{}'::jsonb`),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 });
 
@@ -165,7 +180,9 @@ export const affiliateWithdrawalRequests = pgTable('affiliate_withdrawal_request
 	status: text('status').notNull().default('requested'),
 	payoutReference: text('payout_reference'),
 	failureReason: text('failure_reason'),
-	metadata: jsonb('metadata').notNull().default({}),
+	metadata: jsonb('metadata')
+		.notNull()
+		.default(sql`'{}'::jsonb`),
 	requestedAt: timestamp('requested_at', { withTimezone: true }).notNull().defaultNow(),
 	processedAt: timestamp('processed_at', { withTimezone: true }),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -182,11 +199,11 @@ export const bookingLiveLocations = pgTable('booking_live_locations', {
 	providerId: uuid('provider_id')
 		.notNull()
 		.references(() => profiles.id),
-	latitude: sql`double precision`.notNull(), // Drizzle uses sql template for double precision specifically sometimes
-	longitude: sql`double precision`.notNull(),
-	accuracyMeters: sql`double precision`,
-	headingDegrees: sql`double precision`,
-	speedMps: sql`double precision`,
+	latitude: doublePrecision('latitude').notNull(),
+	longitude: doublePrecision('longitude').notNull(),
+	accuracyMeters: doublePrecision('accuracy_meters'),
+	headingDegrees: doublePrecision('heading_degrees'),
+	speedMps: doublePrecision('speed_mps'),
 	capturedAt: timestamp('captured_at', { withTimezone: true }).notNull().defaultNow(),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()

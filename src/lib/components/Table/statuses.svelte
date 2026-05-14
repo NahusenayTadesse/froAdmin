@@ -45,7 +45,12 @@
 		unremovable: { icon: BadgeCheck, colour: 'bg-green-400' },
 		removable: { icon: OctagonMinus, colour: 'bg-red-500' },
 
-		/* fallback */
+		reviewed: { icon: BadgeCheck, colour: 'bg-green-400' },
+		unreviewed: { icon: Loader, colour: 'bg-yellow-500' },
+
+		discoverable: { icon: BadgeCheck, colour: 'bg-green-400' },
+		undescoverable: { icon: Loader, colour: 'bg-yellow-500' },
+
 		unknown: { icon: Loader, colour: 'bg-gray-500' }
 	} as const);
 

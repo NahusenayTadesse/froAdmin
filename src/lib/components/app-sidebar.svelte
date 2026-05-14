@@ -9,7 +9,8 @@
 		UserCheck,
 		CalendarClock,
 		Banknote,
-		BanknoteArrowDown
+		BanknoteArrowDown,
+		Video
 	} from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
@@ -24,6 +25,7 @@
 		{ title: 'Providers', url: '/dashboard/vendor', icon: UserCheck },
 		{ title: 'Services', url: '/dashboard/services', icon: Toolbox },
 		{ title: 'Bookings', url: '/dashboard/bookings', icon: CalendarClock },
+		{ title: 'Vidoes', url: '/dashboard/videos', icon: Video },
 		{ title: 'Transactions', url: '/dashboard/transactions', icon: Banknote },
 		{ title: 'Expenses', url: '/dashboard/expenses', icon: BanknoteArrowDown },
 
@@ -78,9 +80,9 @@
 <Sidebar.Root collapsible="offcanvas" {...restProps}>
 	<Sidebar.Content
 		class="z-9999! h-full
-  overflow-y-scroll pt-4
-  [scrollbar-color:#a3a3a3_transparent]
-  [scrollbar-width:thin]
+  [scrollbar-width:thin] [scrollbar-color:#a3a3a3_transparent]
+  overflow-y-scroll
+  pt-4
   [&::-webkit-scrollbar]:w-2
   [&::-webkit-scrollbar-thumb]:bg-gray-400
   [&::-webkit-scrollbar-thumb:hover]:bg-gray-500 [&::-webkit-scrollbar-track]:bg-transparent

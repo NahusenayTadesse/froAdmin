@@ -6,6 +6,28 @@ import Statuses from '$lib/components/Table/statuses.svelte';
 import { formatDate } from '$lib/global.svelte';
 import { Link } from '@lucide/svelte';
 
+/**
+ * Returns the currency symbol for a given ISO 4217 currency code.
+ * @param currencyCode - The currency code (e.g., 'USD', 'EUR')
+ * @param locale - Optional locale (defaults to 'en-US')
+ */
+export const getSymbol = (currencyCode: string, locale: string = 'en-US'): string => {
+	try {
+		return (
+			new Intl.NumberFormat(locale, {
+				style: 'currency',
+				currency: currencyCode
+			})
+				.formatToParts(0)
+				.find((part) => part.type === 'currency')?.value || currencyCode
+		);
+	} catch (error) {
+		// Fallback to the code itself if the currencyCode is invalid
+		console.error(`Invalid currency code: ${currencyCode}`, error);
+		return currencyCode;
+	}
+};
+
 export const columns = [
 	{
 		accessorKey: 'index',
@@ -80,6 +102,7 @@ export const columns = [
 			}),
 		cell: (info) => `$${info.getValue() ?? '0'}`
 	},
+
 	{
 		accessorKey: 'bookingStatus',
 		header: ({ column }) =>
