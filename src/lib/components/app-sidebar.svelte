@@ -25,7 +25,7 @@
 		{ title: 'Providers', url: '/dashboard/vendor', icon: UserCheck },
 		{ title: 'Services', url: '/dashboard/services', icon: Toolbox },
 		{ title: 'Bookings', url: '/dashboard/bookings', icon: CalendarClock },
-		{ title: 'Vidoes', url: '/dashboard/videos', icon: Video },
+		{ title: 'Videos', url: '/dashboard/videos', icon: Video },
 		{ title: 'Transactions', url: '/dashboard/transactions', icon: Banknote },
 		{ title: 'Expenses', url: '/dashboard/expenses', icon: BanknoteArrowDown },
 

@@ -6,30 +6,9 @@ import { formatDate } from '$lib/global.svelte';
 import Statuses from '$lib/components/Table/statuses.svelte';
 import Address from '$lib/components/Table/address.svelte';
 import BigText from '$lib/components/Table/bigText.svelte';
-import type { ColumnDef } from '@tanstack/table-core';
-import { Checkbox } from '$lib/components/ui/checkbox/index.js';
 import VideoViewer from '$lib/components/Table/videoViewer.svelte';
 
 export const columns = [
-	{
-		id: 'select',
-		accessorKey: 'id',
-		header: ({ table }) =>
-			renderComponent(Checkbox, {
-				checked: table.getIsAllPageRowsSelected(),
-				indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
-				onCheckedChange: (value) => table.toggleAllPageRowsSelected(!!value),
-				'aria-label': 'Select all'
-			}),
-		cell: ({ row }) =>
-			renderComponent(Checkbox, {
-				checked: row.getIsSelected(),
-				onCheckedChange: (value) => row.toggleSelected(!!value),
-				'aria-label': 'Select row'
-			}),
-		enableSorting: false,
-		enableHiding: false
-	},
 	{
 		id: 'index',
 		header: '#',

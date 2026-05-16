@@ -1,0 +1,19 @@
+import { redirect } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
+import { getCurrentMonthRange } from '$lib/global.svelte';
+
+export const load: PageServerLoad = async () => {
+	function getCurrentMonthRange(): string {
+		const today = new Date();
+
+		const year = today.getFullYear();
+		const month = String(today.getMonth() + 1).padStart(2, '0');
+		const day = String(today.getDate()).padStart(2, '0');
+
+		const todayStr = `${year}-${month}-${day}`;
+
+		return `${todayStr}-${todayStr}`;
+	}
+
+	redirect(303, `/dashboard/videos/${getCurrentMonthRange()}`);
+};

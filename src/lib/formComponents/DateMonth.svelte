@@ -13,7 +13,7 @@
 
 	let {
 		id = null,
-		link = '/dashboard/staff',
+		link = '/dashboard',
 		start = '2025-11-08',
 		end = '2025-11-08'
 	}: { id?: number; link: string; start?: string; end?: string } = $props();
