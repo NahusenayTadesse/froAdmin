@@ -1,10 +1,10 @@
 <script lang="ts">
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
-	import { SquarePen, Save } from '@lucide/svelte';
+	import { Save } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import type { changeStatus, Edit } from './schema';
+	import type { changeStatus } from './schema';
 	import { buttonVariants } from '$lib/components/ui/button/index.js';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import * as Dialog from '$lib/components/ui/popover/index.js';
 
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
@@ -29,8 +29,17 @@
 		disabled: boolean;
 	} = $props();
 
-	const { form, errors, enhance, delayed, message, allErrors } = superForm(data, {
-		resetForm: false
+	const { form, errors, enhance, delayed, allErrors } = superForm(data, {
+		resetForm: false,
+		onUpdated({ form }) {
+			if (form.message) {
+				if (form.message.type === 'error') {
+					toast.error(form.message.text);
+				} else {
+					toast.success(form.message.text);
+				}
+			}
+		}
 	});
 
 	let open = $state(false);
@@ -40,15 +49,6 @@
 	import { toast } from 'svelte-sonner';
 	import InputComp from '$lib/formComponents/InputComp.svelte';
 	import type { Item } from '$lib/global.svelte';
-	$effect(() => {
-		if ($message) {
-			if ($message.type === 'error') {
-				toast.error($message.text);
-			} else {
-				toast.success($message.text);
-			}
-		}
-	});
 
 	const states: Item[] = $derived(
 		verificationsStates.map((s) => ({ value: s.state, name: s.state }))
@@ -65,7 +65,7 @@
 				>
 					{name}
 				</Dialog.Trigger>
-				<Dialog.Content class="w-full">
+				<Dialog.Content class="w-sm">
 					<Dialog.Header>
 						<Dialog.Title class="text-center text-4xl"
 							>Change {name} for selected videos</Dialog.Title

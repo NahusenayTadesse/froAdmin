@@ -1,14 +1,15 @@
 import { renderComponent } from '$lib/components/ui/data-table/index.js';
 import DataTableLinks from '$lib/components/Table/data-table-links.svelte';
-import Copy from '$lib/Copy.svelte';
 import DataTableSort from '$lib/components/Table/data-table-sort.svelte';
 import { formatDate } from '$lib/global.svelte';
 import Statuses from '$lib/components/Table/statuses.svelte';
-import Address from '$lib/components/Table/address.svelte';
 import BigText from '$lib/components/Table/bigText.svelte';
-import type { ColumnDef } from '@tanstack/table-core';
 import { Checkbox } from '$lib/components/ui/checkbox/index.js';
-import VideoViewer from '$lib/components/Table/videoViewer.svelte';
+import VideoViewer from './videoViewer.svelte';
+import { superValidate } from 'sveltekit-superforms';
+import { zod4 } from 'sveltekit-superforms/adapters';
+import { changeStatus } from './schema';
+const form = await superValidate(zod4(changeStatus));
 
 export const columns = [
 	{
@@ -54,7 +55,9 @@ export const columns = [
 			return renderComponent(VideoViewer, {
 				src: row.original.url,
 				label: row.original.title,
-				poster: row.original.thumbnail
+				poster: row.original.thumbnail,
+				id: row.original.id,
+				form: form
 			});
 		}
 	},

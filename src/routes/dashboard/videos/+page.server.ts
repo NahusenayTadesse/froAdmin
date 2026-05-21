@@ -55,7 +55,10 @@ export const load: PageServerLoad = async ({ url }) => {
 		thumb: `${PUBLIC_SUPABASE_URL}/storage/v1/object/public/video_thumbnails/${video.thumbnailPath}`
 	}));
 
+	const serviceList: string[] = [...new Set(videoList.map((service) => service.serviceName))];
+
 	return {
+		services: serviceList,
 		form,
 		videoList,
 		verificationStates,
