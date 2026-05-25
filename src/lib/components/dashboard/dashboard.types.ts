@@ -11,7 +11,9 @@ export type ActivityEventType =
 	| 'booking_completed'
 	| 'cancelled'
 	| 'payment'
-	| 'new_user';
+	| 'new_user'
+	| 'report_case'
+	| 'report_case_message';
 
 // ─── Sub-shapes ────────────────────────────────────────────────────────────────
 

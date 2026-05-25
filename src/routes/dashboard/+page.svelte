@@ -1,10 +1,10 @@
 <script>
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabaseClient'; // Adjust path to your client
-	import Stats from '$lib/components/dashboard/ stats.svelte';
+	import Stats from '$lib/components/dashboard/stats.svelte';
 
 	let { data } = $props();
-	const user = data.session?.user;
+	const user = $derived(data.session?.user);
 
 	// Use a rune to keep the list reactive
 	let onlineUsers = $state([]);

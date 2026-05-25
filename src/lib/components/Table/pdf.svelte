@@ -313,7 +313,7 @@
 			</Button>
 		{/snippet}
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content class="w-auto">
+	<DropdownMenu.Content class="w-auto ">
 		<DropdownMenu.Item class="capitalize">
 			<Button variant="default" onclick={generatedPdf}>
 				<FileDown class="size-4 text-white dark:text-black" /> Download in PDF

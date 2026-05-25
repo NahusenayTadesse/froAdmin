@@ -3,6 +3,8 @@ import type { PageServerLoad } from './$types';
 import type {
 	DailyDashboardData,
 	BookingStatus,
+	ActivityEvent,
+	ActivityEventType,
 	HourlyBucket
 } from '$lib/components/dashboard/dashboard.types';
 
@@ -59,6 +61,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		pipelineRes,
 		recentRes,
 		feedRes,
+		reportCasesRes,
+		reportMessagesRes,
 		providersRes,
 		hourlyRes
 	] = await Promise.all([
@@ -159,7 +163,21 @@ export const load: PageServerLoad = async ({ locals }) => {
 			.order('updated_at', { ascending: false })
 			.limit(20),
 
-		// 11. Top providers by earnings today
+		// 11. Recent dispute/report cases for the admin activity feed
+		supabase
+			.from('report_cases')
+			.select('id,type,subject,description,status,severity,created_at,updated_at')
+			.order('updated_at', { ascending: false })
+			.limit(10),
+
+		// 12. Recent dispute/report chat messages for the admin activity feed
+		supabase
+			.from('report_case_messages')
+			.select('id,case_id,sender_role,body,created_at,report_cases ( type, subject )')
+			.order('created_at', { ascending: false })
+			.limit(10),
+
+		// 13. Top providers by earnings today
 		supabase
 			.from('wallet_transactions')
 			.select('wallet_id, amount, wallets ( user_id, profiles ( first_name, last_name ) )')
@@ -168,7 +186,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			.gte('created_at', todayStart)
 			.lte('created_at', todayEnd),
 
-		// 12. Hourly booking counts for the past 12 hours
+		// 14. Hourly booking counts for the past 12 hours
 		supabase
 			.from('bookings')
 			.select('created_at')
@@ -239,12 +257,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const activityFeed = (feedRes.data ?? []).slice(0, 8).map((b: any) => {
+	const bookingActivity = (feedRes.data ?? []).slice(0, 8).map((b: any) => {
 		const svc = b.services?.title ?? 'Service';
 		const customer = [b.customer?.first_name, b.customer?.last_name].filter(Boolean).join(' ');
 		const provider = [b.provider?.first_name, b.provider?.last_name].filter(Boolean).join(' ');
 
-		type EventMap = Record<string, { type: string; msg: string }>;
+		type EventMap = Record<string, { type: ActivityEventType; msg: string }>;
 		const map: EventMap = {
 			in_progress: { type: 'booking_started', msg: `${provider} started a booking` },
 			completed: { type: 'booking_completed', msg: `Booking completed by ${provider}` },
@@ -256,8 +274,43 @@ export const load: PageServerLoad = async ({ locals }) => {
 			pending: { type: 'booking_created', msg: `New booking request from ${customer}` }
 		};
 		const ev = map[b.booking_status] ?? { type: 'booking_created', msg: 'Booking updated' };
-		return { type: ev.type, msg: ev.msg, sub: `${svc} · ${customer}`, time: relTime(b.updated_at) };
+		return {
+			type: ev.type,
+			msg: ev.msg,
+			sub: `${svc} · ${customer}`,
+			time: relTime(b.updated_at),
+			at: b.updated_at
+		};
 	});
+
+	// Include recent report/dispute cases and dispute chat messages in the main
+	// dashboard feed so admins see the newest support activity immediately.
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const reportCaseActivity = (reportCasesRes.data ?? []).map((c: any) => ({
+		type: 'report_case',
+		msg: `Report/dispute ${c.status ?? 'updated'} — ${c.subject ?? c.type ?? 'Case'}`,
+		sub: `${c.severity ?? 'medium'} priority · ${String(c.description ?? '').slice(0, 80)}`,
+		time: relTime(c.updated_at ?? c.created_at),
+		at: c.updated_at ?? c.created_at
+	}));
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const reportMessageActivity = (reportMessagesRes.data ?? []).map((m: any) => ({
+		type: 'report_case_message',
+		msg: `New ${m.sender_role === 'admin' ? 'admin' : 'reporter'} message`,
+		sub: `${m.report_cases?.subject ?? m.report_cases?.type ?? m.case_id} · ${String(m.body ?? '').slice(0, 90)}`,
+		time: relTime(m.created_at),
+		at: m.created_at
+	}));
+
+	const activityFeed: ActivityEvent[] = [
+		...reportMessageActivity,
+		...reportCaseActivity,
+		...bookingActivity
+	]
+		.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+		.slice(0, 12)
+		.map(({ at: _at, ...event }) => event as ActivityEvent);
 
 	// Top providers
 	type ProviderAcc = Record<string, { name: string; earnings: number; bookings: number }>;

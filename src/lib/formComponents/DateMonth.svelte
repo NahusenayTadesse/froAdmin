@@ -14,8 +14,8 @@
 	let {
 		id = null,
 		link = '/dashboard',
-		start = '2025-11-08',
-		end = '2025-11-08'
+		start = '2026-11-08',
+		end = '2026-11-08'
 	}: { id?: number; link: string; start?: string; end?: string } = $props();
 
 	let startDate = new Date(start);

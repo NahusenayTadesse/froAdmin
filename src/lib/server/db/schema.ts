@@ -9,7 +9,6 @@ import {
 	boolean,
 	date,
 	time,
-	primaryKey,
 	check,
 	bigint
 } from 'drizzle-orm/pg-core';
@@ -188,6 +187,9 @@ export const bookings = pgTable('bookings', {
 	notesFromCustomer: text('notes_from_customer'),
 	bookingStatus: text('booking_status').default('pending').notNull(),
 	paymentStatus: text('payment_status').default('pending').notNull(),
+	paymentFailureCode: text('payment_failure_code'),
+	paymentFailureMessage: text('payment_failure_message'),
+	paymentFailedAt: timestamp('payment_failed_at', { withTimezone: true }),
 	totalPrice: numeric('total_price').notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
@@ -237,6 +239,92 @@ export const walletTransactions = pgTable('wallet_transactions', {
 	amount: numeric('amount').notNull(),
 	description: text('description'),
 	status: text('status').default('pending').notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
+});
+
+export const videos = pgTable(
+	'videos',
+	{
+		id: uuid('id').primaryKey().defaultRandom().notNull(),
+		providerId: uuid('provider_id')
+			.notNull()
+			.references(() => profiles.id),
+		serviceId: uuid('service_id')
+			.notNull()
+			.references(() => services.id),
+		videoPath: text('video_path').notNull(),
+		thumbnailPath: text('thumbnail_path'),
+		title: text('title'),
+		description: text('description'),
+		durationSeconds: integer('duration_seconds'),
+		aspectRatio: text('aspect_ratio').default('16:9'),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+		verificationState: text('verification_state').default('UNVERIFIED').notNull(),
+		isDiscoverable: boolean('is_discoverable').default(false).notNull(),
+		displayOrder: integer('display_order').default(0).notNull(),
+		complianceReviewed: boolean('compliance_reviewed').default(false).notNull(),
+		complianceNotes: text('compliance_notes'),
+		availabilitySyncedAt: timestamp('availability_synced_at', { withTimezone: true })
+	},
+	(table) => [
+		check(
+			'videos_verification_state_check',
+			sql`${table.verificationState} IN ('UNVERIFIED', 'IDENTITY_VERIFIED', 'LICENSE_VERIFIED', 'RESTRICTED', 'SUSPENDED')`
+		)
+	]
+);
+
+export const providerWalletBalances = pgTable('provider_wallet_balances', {
+	providerId: uuid('provider_id')
+		.notNull()
+		.primaryKey()
+		.references(() => profiles.id),
+	availableBalance: numeric('available_balance').default('0').notNull(),
+	pendingBalance: numeric('pending_balance').default('0').notNull(),
+	onHoldBalance: numeric('on_hold_balance').default('0').notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
+});
+
+export const providerWithdrawals = pgTable('provider_withdrawals', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	providerId: uuid('provider_id')
+		.notNull()
+		.references(() => profiles.id),
+	amount: numeric('amount').notNull(),
+	currency: text('currency').default('usd').notNull(),
+	status: text('status').default('requested').notNull(),
+	requestedAt: timestamp('requested_at', { withTimezone: true }).defaultNow(),
+	processedAt: timestamp('processed_at', { withTimezone: true }),
+	failureReason: text('failure_reason'),
+	stripePayoutId: text('stripe_payout_id'),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
+});
+
+export const providerLedgerEntries = pgTable('provider_ledger_entries', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	providerId: uuid('provider_id')
+		.notNull()
+		.references(() => profiles.id),
+	bookingId: uuid('booking_id').references(() => bookings.id),
+	entryType: text('entry_type').notNull(),
+	amount: numeric('amount').notNull(),
+	currency: text('currency').default('usd').notNull(),
+	referenceType: text('reference_type'),
+	referenceId: text('reference_id'),
+	note: text('note'),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
+});
+
+export const paymentEvents = pgTable('payment_events', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	userId: uuid('user_id').references(() => profiles.id),
+	eventSource: text('event_source').notNull(),
+	eventType: text('event_type').notNull(),
+	stripeEventId: text('stripe_event_id'),
+	stripeObjectId: text('stripe_object_id'),
+	processedAt: timestamp('processed_at', { withTimezone: true }),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
 });
 
@@ -311,136 +399,3 @@ export const expensesType = pgTable('expenses_type', {
 	name: text('name').notNull().unique(),
 	description: text('description')
 });
-
-// export * from './afflaite';
-
-export const videos = pgTable(
-	'videos',
-	{
-		id: uuid('id').primaryKey().defaultRandom().notNull(),
-		providerId: uuid('provider_id')
-			.notNull()
-			.references(() => profiles.id),
-		serviceId: uuid('service_id')
-			.notNull()
-			.references(() => services.id),
-		videoPath: text('video_path').notNull(),
-		thumbnailPath: text('thumbnail_path'),
-		title: text('title'),
-		description: text('description'),
-		durationSeconds: integer('duration_seconds'),
-		aspectRatio: text('aspect_ratio').default('16:9'),
-		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-		verificationState: text('verification_state').default('UNVERIFIED').notNull(),
-		isDiscoverable: boolean('is_discoverable').default(false).notNull(),
-		displayOrder: integer('display_order').default(0).notNull(),
-		complianceReviewed: boolean('compliance_reviewed').default(false).notNull(),
-		complianceNotes: text('compliance_notes'),
-		availabilitySyncedAt: timestamp('availability_synced_at', { withTimezone: true })
-	},
-	(table) => [
-		check(
-			'videos_verification_state_check',
-			sql`${table.verificationState} IN ('UNVERIFIED', 'IDENTITY_VERIFIED', 'LICENSE_VERIFIED', 'RESTRICTED', 'SUSPENDED')`
-		)
-	]
-);
-
-export const videoDiscoveryFeaturesV1 = pgTable('video_discovery_features_v1', {
-	// Primary Key and Foreign Key combined
-	videoId: uuid('video_id')
-		.primaryKey()
-		.notNull()
-		.references(() => videos.id),
-
-	providerId: uuid('provider_id')
-		.notNull()
-		.references(() => profiles.id),
-
-	serviceId: uuid('service_id')
-		.notNull()
-		.references(() => services.id),
-
-	// Discovery Flags and Scores
-	isDiscoverable: boolean('is_discoverable').default(false).notNull(),
-	recencyScore: doublePrecision('recency_score').default(0).notNull(),
-	qualityScore: doublePrecision('quality_score').default(0).notNull(),
-	boostScore: doublePrecision('boost_score').default(0).notNull(),
-	discoverScore: doublePrecision('discover_score').default(0).notNull(),
-
-	// Timestamps
-	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-
-	// Raw Engagement Counters
-	impressionCount: integer('impression_count').default(0).notNull(),
-	clickCount: integer('click_count').default(0).notNull(),
-	openCount: integer('open_count').default(0).notNull(),
-	watchCount: integer('watch_count').default(0).notNull(),
-	bookCount: integer('book_count').default(0).notNull(),
-
-	// Calculated Rates and Final Engagement Score
-	ctr: doublePrecision('ctr').default(0).notNull(),
-	openRate: doublePrecision('open_rate').default(0).notNull(),
-	watchRate: doublePrecision('watch_rate').default(0).notNull(),
-	bookRate: doublePrecision('book_rate').default(0).notNull(),
-	engagementScore: doublePrecision('engagement_score').default(0).notNull()
-});
-
-export const videoComments = pgTable(
-	'video_comments',
-	{
-		id: uuid('id').primaryKey().defaultRandom(),
-		videoId: uuid('video_id')
-			.notNull()
-			.references(() => videos.id),
-		userId: uuid('user_id')
-			.notNull()
-			.references(() => profiles.id),
-		parentCommentId: uuid('parent_comment_id').references((): any => videoComments.id),
-		commentText: text('comment_text').notNull(),
-		likesCount: integer('likes_count').notNull().default(0),
-		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
-	},
-	(table) => [
-		// Implementing the length and whitespace check constraints
-		check(
-			'video_comments_comment_text_check',
-			sql`length(trim(both from ${table.commentText})) > 0 AND length(${table.commentText}) <= 1000`
-		),
-		check('video_comments_likes_count_check', sql`${table.likesCount} >= 0`)
-	]
-);
-
-export const videoCommentLikes = pgTable(
-	'video_comment_likes',
-	{
-		commentId: uuid('comment_id')
-			.notNull()
-			.references(() => videoComments.id),
-		userId: uuid('user_id')
-			.notNull()
-			.references(() => profiles.id),
-		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
-	},
-	(table) => [
-		// Composite Primary Key
-		primaryKey({ columns: [table.commentId, table.userId] })
-	]
-);
-
-// export const videoBoostCampaigns = pgTable('video_boost_campaigns', {
-// 	id: uuid('id').primaryKey().defaultRandom(),
-// 	providerId: uuid('provider_id')
-// 		.notNull()
-// 		.references(() => profiles.id),
-// 	videoId: uuid('video_id')
-// 		.notNull()
-// 		.references(() => videos.id),
-// 	providerBoosterId: uuid('provider_booster_id')
-// 		.notNull()
-// 		.references(() => provider_boosters.id),
-// 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-// 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
-// });

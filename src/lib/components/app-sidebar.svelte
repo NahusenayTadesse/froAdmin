@@ -26,6 +26,7 @@
 		{ title: 'Services', url: '/dashboard/services', icon: Toolbox },
 		{ title: 'Bookings', url: '/dashboard/bookings', icon: CalendarClock },
 		{ title: 'Videos', url: '/dashboard/videos', icon: Video },
+		{ title: 'Payments', url: '/dashboard/payments', icon: Banknote },
 		{ title: 'Transactions', url: '/dashboard/transactions', icon: Banknote },
 		{ title: 'Expenses', url: '/dashboard/expenses', icon: BanknoteArrowDown },
 
@@ -44,6 +45,11 @@
 			url: '/dashboard/admin-panel',
 			icon: ShieldUser,
 			items: [
+				{
+					title: 'Disputes & Reports',
+					url: '/dashboard/admin-panel/disputes',
+					icon: ShieldUser
+				},
 				{ title: 'Admin Users', url: '/dashboard/admin-panel/users', icon: Users },
 				{ title: 'Admin Roles', url: '/dashboard/admin-panel/roles', icon: ShieldUser }
 			]

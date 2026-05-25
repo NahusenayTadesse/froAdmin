@@ -1,5 +1,9 @@
 import { db } from '$lib/server/db';
+<<<<<<< HEAD
 import { bookings, profiles, services, providerLedgerEntries } from '$lib/server/db/schema';
+=======
+import { bookings, profiles, services } from '$lib/server/db/schema';
+>>>>>>> secondary/new-branch
 import { and, asc, eq, sql, between, getTableColumns } from 'drizzle-orm';
 
 import type { PageServerLoad } from './$types';
@@ -25,7 +29,10 @@ export const load: PageServerLoad = async ({ params }) => {
 	const allTransactions = await db
 		.select({
 			...getTableColumns(bookings),
+<<<<<<< HEAD
 
+=======
+>>>>>>> secondary/new-branch
 			customerName: sql<string>`concat(${profiles.firstName}, ' ', ${profiles.lastName})`,
 			serviceName: services.title
 		})
