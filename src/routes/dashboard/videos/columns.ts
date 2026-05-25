@@ -50,14 +50,15 @@ export const columns = [
 				onclick: column.getToggleSortingHandler()
 			}),
 		sortable: true,
-		cell: ({ row }) => {
-			// You can pass whatever you need from `row.original` to the component
+		cell: ({ row, table }) => {
 			return renderComponent(VideoViewer, {
 				src: row.original.url,
 				label: row.original.title,
 				poster: row.original.thumbnail,
 				id: row.original.id,
-				form: form
+				form,
+				rows: table.getRowModel().rows,
+				rowIndex: row.index
 			});
 		}
 	},

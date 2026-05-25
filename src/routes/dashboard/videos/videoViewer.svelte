@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
-	import { Play, Video, X, ChevronRight } from '@lucide/svelte';
+	import { Play, Video, X, ChevronRight, ChevronLeft } from '@lucide/svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import type { changeStatus } from './schema';
 	import Edit from './edit.svelte';
@@ -13,24 +13,57 @@
 		id: string;
 		form: SuperValidated<Infer<typeof changeStatus>>;
 		verificationsStates?: string[{ state }];
+		rows: any[];
+		rowIndex: number;
 	};
 
-	let { src, label, poster, id, form, verificationsStates }: Props = $props();
+	let {
+		src,
+		label,
+		poster,
+		id,
+		form,
+		verificationsStates,
+		rows = [],
+		rowIndex = 0
+	}: Props = $props();
 
 	let open = $state(false);
 	let modalVideoEl = $state<HTMLVideoElement | null>(null);
 	let isHovered = $state(false);
 
-	// Handle auto-play when dialog opens via shadcn's open state
+	// ✅ Mutable state — not $derived
+	let currentIndex = $derived(rowIndex);
+
+	// ✅ Derive video data from currentIndex
+	const currentRow = $derived(rows[currentIndex]?.original);
+	const currentSrc = $derived(currentRow?.url ?? src);
+	const currentLabel = $derived(currentRow?.title ?? label);
+	const currentPoster = $derived(currentRow?.thumbnail ?? poster);
+	const currentId = $derived(currentRow?.id ?? id);
+	const idArray = $derived([currentId]);
+
+	// ✅ Restart video when navigating
 	$effect(() => {
 		if (open && modalVideoEl) {
-			modalVideoEl.play().catch(() => {
-				console.log('Autoplay blocked or failed');
-			});
+			modalVideoEl.load();
+			modalVideoEl.play().catch(() => {});
 		}
 	});
 
-	let idArray: string[] = $state([id]);
+	$effect(() => {
+		if (open && modalVideoEl) {
+			modalVideoEl.play().catch(() => {});
+		}
+	});
+
+	function goPrev() {
+		if (currentIndex > 0) currentIndex--;
+	}
+
+	function goNext() {
+		if (currentIndex < rows.length - 1) currentIndex++;
+	}
 </script>
 
 <Dialog.Root bind:open>
@@ -47,7 +80,13 @@
 				<div
 					class="relative h-12 w-20 shrink-0 overflow-hidden rounded-md border border-border bg-muted"
 				>
-					<video {src} {poster} muted preload="metadata" class="h-full w-full object-cover"></video>
+					<video
+						src={currentSrc}
+						poster={currentPoster}
+						muted
+						preload="metadata"
+						class="h-full w-full object-cover"
+					></video>
 
 					<!-- Hover Play Icon -->
 					<div
@@ -83,11 +122,11 @@
 	</Dialog.Trigger>
 
 	<!-- MODAL CONTENT -->
-	<Dialog.Content class="gap-0 overflow-hidden p-0 sm:max-w-[800px]">
+	<Dialog.Content class="gap-0 overflow-hidden p-0 sm:max-w-200">
 		<Dialog.Header class="border-b bg-muted/30 p-4">
 			<div class="flex items-center gap-2">
 				<Video class="h-4 w-4 text-primary" />
-				<Dialog.Title class="text-base font-medium">{label ?? 'Video Preview'}</Dialog.Title>
+				<Dialog.Title class="text-base font-medium">{currentLabel ?? 'Video Preview'}</Dialog.Title>
 			</div>
 		</Dialog.Header>
 		<div class="my-2 flex flex-row items-start justify-start px-2">
@@ -121,12 +160,34 @@
 		</div>
 
 		<div class="aspect-video w-full bg-black">
-			<video bind:this={modalVideoEl} {src} {poster} controls playsinline class="h-full w-full">
+			<video
+				bind:this={modalVideoEl}
+				src={currentSrc}
+				poster={currentPoster}
+				controls
+				playsinline
+				class="h-full w-full"
+			>
 				<track kind="captions" />
 				Your browser does not support the video tag.
 			</video>
 		</div>
-
+		<div class="flex items-center justify-between border-t px-4 py-3">
+			<Button variant="outline" size="sm" disabled={currentIndex === 0} onclick={goPrev}>
+				<ChevronLeft /> Previous
+			</Button>
+			<span class="text-sm text-muted-foreground">
+				{currentIndex + 1} / {rows.length}
+			</span>
+			<Button
+				variant="outline"
+				size="sm"
+				disabled={currentIndex === rows.length - 1}
+				onclick={goNext}
+			>
+				Next <ChevronRight />
+			</Button>
+		</div>
 		<Dialog.Footer class="flex flex-row items-start justify-between">
 			<Dialog.Close>
 				<Button variant="secondary" size="sm"><X /> Close</Button>

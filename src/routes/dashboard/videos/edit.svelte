@@ -68,8 +68,8 @@
 				<Dialog.Content class="w-sm">
 					<Dialog.Header>
 						<Dialog.Title class="text-center text-4xl"
-							>Change {name} for selected videos</Dialog.Title
-						>
+							>Change {name} for selected videos
+						</Dialog.Title>
 					</Dialog.Header>
 					<form {action} use:enhance method="post" id="edit" class="flex w-full flex-col gap-4 p-4">
 						<Errors allErrors={$allErrors} />
@@ -78,7 +78,7 @@
 							<InputComp
 								label="Verification State"
 								name="verificationState"
-								type="select"
+								type="combo"
 								{form}
 								{errors}
 								items={states}
@@ -101,7 +101,6 @@
 								<LoadingBtn name="Saving Changes" />
 							{:else}
 								<Save class="h-4 w-4" />
-
 								Save Changes
 							{/if}
 						</Button>
