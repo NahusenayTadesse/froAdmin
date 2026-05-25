@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1777570676509,
+      "tag": "0000_remarkable_mysterio",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778091616210,
+      "tag": "0001_majestic_black_bird",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778092181561,
+      "tag": "0002_early_lady_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778093044337,
+      "tag": "0003_brainy_cyclops",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778094352337,
+      "tag": "0004_ambiguous_supreme_intelligence",
+      "breakpoints": true
+    }
+  ]
+}
