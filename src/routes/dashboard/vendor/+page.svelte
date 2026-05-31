@@ -8,6 +8,7 @@
 	import { Frown, Plus } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import FilterMenu from '$lib/components/Table/FilterMenu.svelte';
+	import Mobile from './mobile.svelte';
 
 	let filteredList = $derived(data?.userList);
 </script>
@@ -42,5 +43,6 @@
 			'banned'
 		]}
 	/>
+	<Mobile services={filteredList} />
 	<DataTable data={filteredList} {columns} fileName="Users List" />
 {/if}

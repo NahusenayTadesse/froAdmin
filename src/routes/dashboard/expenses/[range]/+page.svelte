@@ -12,6 +12,7 @@
 
 	import type { ChartData } from 'chart.js';
 	import Chart from '$lib/components/chart.svelte';
+	import Mobile from './mobile.svelte';
 
 	const barData: ChartData = {
 		labels: ['January', 'February', 'March', 'April', 'May', 'June'],
@@ -94,6 +95,8 @@
 				data={data?.allTransactions}
 				filterKeys={['amount', 'expenseType', 'date', 'addedBy']}
 			/>
+
+			<Mobile expenses={filteredList} />
 			<DataTable data={filteredList} fileName="Bookings  {data?.start} - {data?.end}" {columns} />
 		</div>
 	{/if}

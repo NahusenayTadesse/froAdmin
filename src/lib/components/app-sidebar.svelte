@@ -58,8 +58,6 @@
 
 	let { ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 
-	const on = 'bg-sidebar-primary text-sidebar-primary-foreground';
-	const off = 'text-sidebar-foreground';
 	// function blacken(url: string) {
 	// 	const currentPath = page.url.pathname;
 
@@ -97,35 +95,12 @@
 	>
 		<Sidebar.Group>
 			<Sidebar.GroupLabel>
-				<h4 class="text-4xl">Fro Admin</h4>
+				<img src="/logo.png" alt="Fro Admin" class="h-12 w-1/2 justify-self-center" />
 			</Sidebar.GroupLabel>
 			<Sidebar.GroupContent class="my-4">
 				<NavMain items={navigation} />
-				<!-- <Sidebar.Menu class="w-full gap-3">
-					{#each navigation as item (item.title)}
-						<Sidebar.MenuItem>
-							<Sidebar.MenuButton
-								class="flex items-center gap-3 rounded-lg px-3 py-5 text-lg
-          font-normal transition-colors duration-300 hover:bg-sidebar-accent
-          hover:text-sidebar-accent-foreground {selectItem}
-          {blacken(item.url)}"
-							>
-								{#snippet child({ props })}
-									<a href={item.url} onclick={closeSidebar} {...props} transition:fade>
-										<item.icon class="!h-5 !w-5" />
-										<span>{item.title}</span>
-									</a>
-								{/snippet}
-							</Sidebar.MenuButton>
-						</Sidebar.MenuItem>
-					{/each}
-				</Sidebar.Menu> -->
 			</Sidebar.GroupContent>
 		</Sidebar.Group>
 	</Sidebar.Content>
-	<Sidebar.Footer class="flex flex-row bg-white dark:bg-black">
-		<!-- <Sidebar.GroupLabel>
-			Powered By <a href="https://leoradigitals.com" target="_blank" class="ml-1">Leora Digitals</a>
-		</Sidebar.GroupLabel> -->
-	</Sidebar.Footer>
+	<Sidebar.Footer class="flex flex-row bg-white dark:bg-black"></Sidebar.Footer>
 </Sidebar.Root>

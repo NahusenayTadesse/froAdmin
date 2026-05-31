@@ -19,7 +19,6 @@
 	});
 
 	import { Toaster, toast } from 'svelte-sonner';
-	// import { ProgressBar } from '@prgm/sveltekit-progress-bar';
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page, updated } from '$app/state';
 	import NavigationProgress from '$lib/components/NavigationProgress.svelte';
@@ -38,7 +37,10 @@
 </script>
 
 <!-- src/routes/+layout.svelte -->
-<svelte:head><title>Fro Admin</title></svelte:head>
+<svelte:head>
+	<title>Fro Admin</title>
+	<link rel="icon" href="/favicon.png" />
+</svelte:head>
 <ModeWatcher />
 <!-- <ProgressBar color="#7F57F1" /> -->
 

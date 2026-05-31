@@ -8,6 +8,7 @@
 	import { Frown, Plus } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import FilterMenu from '$lib/components/Table/FilterMenu.svelte';
+	import Mobile from './mobile.svelte';
 
 	let filteredList = $derived(data?.userList);
 </script>
@@ -27,5 +28,6 @@
 	<h2 class="my-4 text-2xl">No of Users: {data.userList?.length}</h2>
 
 	<FilterMenu data={data?.userList} bind:filteredList filterKeys={['role', 'status', 'email']} />
+	<Mobile providers={filteredList} />
 	<DataTable data={filteredList} {columns} fileName="Users List" />
 {/if}

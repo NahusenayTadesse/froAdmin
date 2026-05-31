@@ -7,6 +7,7 @@
 	import { Frown, ArrowLeft, CalendarDays } from '@lucide/svelte';
 	import FilterMenu from '$lib/components/Table/FilterMenu.svelte';
 	import { formatDate } from '$lib/global.svelte.js';
+	import Mobile from './mobile.svelte';
 
 	let { data } = $props();
 
@@ -62,8 +63,9 @@
 				bind:filteredList
 				filterKeys={['type', 'amount', 'status']}
 			/>
+			<Mobile transactions={filteredList} />
 			<DataTable
-				data={data.allTransactions}
+				data={filteredList}
 				fileName="Transactions History - {data?.start} to {data?.end}"
 				{columns}
 			/>

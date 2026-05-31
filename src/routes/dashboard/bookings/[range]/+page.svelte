@@ -5,51 +5,16 @@
 	import FilterMenu from '$lib/components/Table/FilterMenu.svelte';
 
 	import { CalendarDays } from '@lucide/svelte';
-	import Piechart from '$lib/components/piechart.svelte';
 
 	let { data } = $props();
 
 	let filteredList = $derived(data?.allTransactions);
 
-	import type { ChartData } from 'chart.js';
-	import Chart from '$lib/components/chart.svelte';
+	import TransactionView from '$lib/components/transaction/transaction-view.svelte';
+	import Mobile from './mobile.svelte';
 
-	const barData: ChartData = {
-		labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-		datasets: [
-			{
-				label: 'Sales 2024',
-				data: [65, 59, 80, 81, 56, 55],
-				backgroundColor: 'rgba(54, 162, 235, 0.5)',
-				borderColor: 'rgb(54, 162, 235)',
-				borderWidth: 1
-			},
-			{
-				label: 'Sales 2023',
-				data: [45, 49, 70, 71, 46, 45],
-				backgroundColor: 'rgba(255, 99, 132, 0.5)',
-				borderColor: 'rgb(255, 99, 132)',
-				borderWidth: 1
-			}
-		]
-	};
-
-	const barOptions = {
-		scales: {
-			y: {
-				beginAtZero: true,
-				title: {
-					display: true,
-					text: 'Sales (in thousands)'
-				}
-			},
-			x: {
-				title: {
-					display: true,
-					text: 'Months'
-				}
-			}
-		}
+	const handleBack = () => {
+		console.log('Navigate back');
 	};
 </script>
 
@@ -57,7 +22,7 @@
 	<title>Bookings</title>
 </svelte:head>
 
-<div class="mx-auto flex w-full max-w-6xl flex-col justify-start gap-8 p-6">
+<div class="mx-auto flex w-full flex-col justify-start gap-8 lg:p-6">
 	<div class="flex flex-col gap-4">
 		<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 			<div>
@@ -104,6 +69,8 @@
 					'totalPrice'
 				]}
 			/>
+			<br />
+			<Mobile bookings={filteredList} />
 			<DataTable data={filteredList} fileName="Bookings  {data?.start} - {data?.end}" {columns} />
 		</div>
 	{/if}

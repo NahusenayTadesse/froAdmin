@@ -13,7 +13,7 @@ export const load: PageServerLoad = async () => {
 			})
 			.from(user)
 			.leftJoin(services, eq(services.providerId, user.id))
-			.where(eq(user.role, 'vendor'))
+			.where(eq(user.role, 'both'))
 			.groupBy(user.id);
 
 		return { userList };

@@ -1,10 +1,24 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Container, LayoutDashboard, SquareChartGantt, UsersRound } from '@lucide/svelte';
+	import {
+		Banknote,
+		CalendarClock,
+		LayoutDashboard,
+		User,
+		UsersRound,
+		Video
+	} from '@lucide/svelte';
 
 	const mobNav = [
 		{ title: 'Dashboard', url: '/dashboard/', icon: LayoutDashboard },
-		{ title: 'Users', url: '/dashboard/users', icon: UsersRound }
+		{ title: 'Bookings', url: '/dashboard/bookings', icon: CalendarClock },
+		{ title: 'Videos', url: '/dashboard/videos', icon: Video },
+		{ title: 'Payments', url: '/dashboard/payments', icon: Banknote },
+		{
+			title: 'Profile',
+			url: '/dashboard/account',
+			icon: User
+		}
 	];
 
 	const on = 'text-primary shadow-lg shadow-primary/20 bg-primary/10';
