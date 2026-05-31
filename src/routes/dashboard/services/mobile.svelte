@@ -300,6 +300,7 @@
 					<MapPin class="size-3" />Location
 				</span>
 				{#each locationTypes() as type (type)}
+					{@const newType = type === 'all' ? 'All' : locationCfg(type).label}
 					<button
 						onclick={() => (activeLocationType = type)}
 						class="shrink-0 rounded-md border px-2.5 py-1 text-xs font-medium transition-all
@@ -307,7 +308,7 @@
 							? 'border-gray-700 bg-gray-700 text-white dark:border-gray-300 dark:bg-gray-300 dark:text-gray-900'
 							: 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800'}"
 					>
-						{type === 'all' ? 'All' : locationCfg(type).label}
+						{newType}
 					</button>
 				{/each}
 			</div>
