@@ -222,7 +222,7 @@
 		<div
 			class="flex gap-0.5 rounded-lg border border-gray-200 bg-gray-50 p-0.5 dark:border-gray-700 dark:bg-gray-800"
 		>
-			{#each STATUS_FILTERS as f}
+			{#each STATUS_FILTERS as f (f)}
 				<button
 					onclick={() => (activeStatus = f.value)}
 					class="rounded-md px-3 py-1.5 text-xs font-medium transition-all
@@ -248,7 +248,7 @@
 
 	<!-- Category pills -->
 	<div class="flex scrollbar-none gap-1.5 overflow-x-auto pb-1">
-		{#each categories() as cat}
+		{#each categories() as cat (cat)}
 			<button
 				onclick={() => (activeCategory = cat)}
 				class="flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all
@@ -278,7 +278,7 @@
 				>
 					<DollarSign class="size-3" />Pricing
 				</span>
-				{#each pricingTypes() as type}
+				{#each pricingTypes() as type (type)}
 					<button
 						onclick={() => (activePricingType = type)}
 						class="shrink-0 rounded-md border px-2.5 py-1 text-xs font-medium transition-all
@@ -299,7 +299,7 @@
 				>
 					<MapPin class="size-3" />Location
 				</span>
-				{#each locationTypes() as type}
+				{#each locationTypes() as type (type)}
 					<button
 						onclick={() => (activeLocationType = type)}
 						class="shrink-0 rounded-md border px-2.5 py-1 text-xs font-medium transition-all
