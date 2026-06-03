@@ -9,8 +9,11 @@ import {
 	boolean,
 	date,
 	time,
+	jsonb,
 	check,
-	bigint
+	bigint,
+	index,
+	uniqueIndex
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
@@ -399,3 +402,175 @@ export const expensesType = pgTable('expenses_type', {
 	name: text('name').notNull().unique(),
 	description: text('description')
 });
+
+export const affiliateCodes = pgTable(
+	'affiliate_codes',
+	{
+		id: uuid('id').defaultRandom().primaryKey().notNull(),
+		affiliateUserId: uuid('affiliate_user_id')
+			.notNull()
+			.references(() => profiles.id, { onDelete: 'cascade' }),
+		code: text('code').notNull(),
+		isActive: boolean('is_active').default(true).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+		metadata: jsonb('metadata').default({}).notNull()
+	},
+	(table) => [
+		uniqueIndex('idx_affiliate_codes_code_unique_ci').on(sql`lower(${table.code})`),
+		index('idx_affiliate_codes_user_active').on(
+			table.affiliateUserId,
+			table.isActive,
+			table.createdAt.desc()
+		),
+		check('affiliate_codes_code_format_check', sql`${table.code} ~ '^[A-Za-z0-9_-]{3,40}$'`)
+	]
+);
+
+export const affiliatePayoutBatches = pgTable(
+	'affiliate_payout_batches',
+	{
+		id: uuid('id').defaultRandom().primaryKey().notNull(),
+		periodStart: date('period_start').notNull(),
+		periodEnd: date('period_end').notNull(),
+		currency: text('currency').default('usd').notNull(),
+		status: text('status').default('draft').notNull(),
+		metadata: jsonb('metadata').default({}).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		processedAt: timestamp('processed_at', { withTimezone: true })
+	},
+	(table) => [
+		uniqueIndex('idx_affiliate_payout_batches_period_currency').on(
+			table.periodStart,
+			table.periodEnd,
+			table.currency
+		),
+
+		check('affiliate_payout_batches_period_check', sql`${table.periodEnd} >= ${table.periodStart}`),
+		check(
+			'affiliate_payout_batches_status_check',
+			sql`${table.status} IN ('draft', 'locked', 'processed', 'failed')`
+		)
+	]
+);
+
+export const affiliateCommissionEvents = pgTable(
+	'affiliate_commission_events',
+	{
+		id: uuid('id').defaultRandom().primaryKey().notNull(),
+		affiliateUserId: uuid('affiliate_user_id')
+			.notNull()
+			.references(() => profiles.id, { onDelete: 'cascade' }),
+		referredUserId: uuid('referred_user_id')
+			.notNull()
+			.references(() => profiles.id, { onDelete: 'cascade' }),
+		providerLedgerEntryId: uuid('provider_ledger_entry_id').references(
+			() => providerLedgerEntries.id,
+			{ onDelete: 'set null' }
+		),
+		revenueEventId: text('revenue_event_id').notNull(),
+		baseAmount: numeric('base_amount', { precision: 12, scale: 2 }).notNull(),
+		commissionBps: integer('commission_bps').notNull(),
+		commissionAmount: numeric('commission_amount', { precision: 12, scale: 2 }).notNull(),
+		currency: text('currency').default('usd').notNull(),
+		status: text('status').default('pending_hold').notNull(),
+		payableAfter: timestamp('payable_after', { withTimezone: true }),
+		payoutBatchId: uuid('payout_batch_id').references(() => affiliatePayoutBatches.id, {
+			onDelete: 'set null'
+		}),
+		metadata: jsonb('metadata').default({}).notNull(),
+		occurredAt: timestamp('occurred_at', { withTimezone: true }).defaultNow().notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
+	},
+	(table) => [
+		uniqueIndex('idx_affiliate_commission_events_revenue_affiliate').on(
+			table.revenueEventId,
+			table.affiliateUserId
+		),
+
+		index('idx_affiliate_commission_events_affiliate_status').on(
+			table.affiliateUserId,
+			table.status,
+			table.occurredAt.desc()
+		),
+
+		check(
+			'affiliate_commission_events_bps_check',
+			sql`${table.commissionBps} >= 0 AND ${table.commissionBps} <= 10000`
+		),
+
+		check(
+			'affiliate_commission_events_status_check',
+			sql`${table.status} IN ('pending_hold', 'payable', 'paid', 'reversed')`
+		)
+	]
+);
+
+export const affiliatePayoutItems = pgTable(
+	'affiliate_payout_items',
+	{
+		id: uuid('id').defaultRandom().primaryKey().notNull(),
+		batchId: uuid('batch_id')
+			.notNull()
+			.references(() => affiliatePayoutBatches.id, { onDelete: 'cascade' }),
+		affiliateUserId: uuid('affiliate_user_id')
+			.notNull()
+			.references(() => profiles.id, { onDelete: 'cascade' }),
+		grossAmount: numeric('gross_amount', { precision: 12, scale: 2 }).notNull(),
+		adjustmentsAmount: numeric('adjustments_amount', { precision: 12, scale: 2 })
+			.default('0')
+			.notNull(),
+		netAmount: numeric('net_amount', { precision: 12, scale: 2 }).notNull(),
+		currency: text('currency').default('usd').notNull(),
+		status: text('status').default('locked').notNull(),
+		metadata: jsonb('metadata').default({}).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
+	},
+	(table) => [
+		uniqueIndex('idx_affiliate_payout_items_batch_affiliate').on(
+			table.batchId,
+			table.affiliateUserId
+		),
+
+		check(
+			'affiliate_payout_items_status_check',
+			sql`${table.status} IN ('locked', 'credited', 'skipped')`
+		)
+	]
+);
+export const affiliateWithdrawalRequests = pgTable(
+	'affiliate_withdrawal_requests',
+	{
+		id: uuid('id').defaultRandom().primaryKey().notNull(),
+		affiliateUserId: uuid('affiliate_user_id')
+			.notNull()
+			.references(() => profiles.id, { onDelete: 'cascade' }),
+		amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
+		currency: text('currency').default('usd').notNull(),
+		status: text('status').default('requested').notNull(),
+		payoutReference: text('payout_reference'),
+		failureReason: text('failure_reason'),
+		metadata: jsonb('metadata').default({}).notNull(),
+		requestedAt: timestamp('requested_at', { withTimezone: true }).defaultNow().notNull(),
+		processedAt: timestamp('processed_at', { withTimezone: true }),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+	},
+	(table) => [
+		// Composite index for (affiliate_user_id, status, created_at desc)
+		index('idx_affiliate_withdrawal_requests_affiliate_status').on(
+			table.affiliateUserId,
+			table.status,
+			table.createdAt.desc()
+		),
+
+		check('affiliate_withdrawal_requests_positive_amount', sql`${table.amount} > 0`),
+
+		check('affiliate_withdrawal_requests_positive_amount', sql`${table.amount} > 0`),
+
+		check(
+			'affiliate_withdrawal_requests_status_check',
+			sql`${table.status} IN ('requested', 'processing', 'paid', 'failed', 'canceled')`
+		)
+	]
+);

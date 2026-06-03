@@ -10,7 +10,8 @@
 		CalendarClock,
 		Banknote,
 		BanknoteArrowDown,
-		Video
+		Video,
+		Link
 	} from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
@@ -29,6 +30,7 @@
 		{ title: 'Payments', url: '/dashboard/payments', icon: Banknote },
 		{ title: 'Transactions', url: '/dashboard/transactions', icon: Banknote },
 		{ title: 'Expenses', url: '/dashboard/expenses', icon: BanknoteArrowDown },
+		{ title: 'Sales', url: '/dashboard/sales', icon: Link },
 
 		{
 			title: 'My Account',
