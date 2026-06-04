@@ -3,5 +3,5 @@ import type { PageServerLoad } from './$types';
 import { getCurrentMonthRange } from '$lib/global.svelte';
 
 export const load: PageServerLoad = async () => {
-	redirect(303, `/dashboard/bookings/${getCurrentMonthRange()}`);
+	redirect(303, `/dashboard/sales/${getCurrentMonthRange()}`);
 };
