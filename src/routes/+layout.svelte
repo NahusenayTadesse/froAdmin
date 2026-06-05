@@ -39,7 +39,7 @@
 <!-- src/routes/+layout.svelte -->
 <svelte:head>
 	<title>Fro Admin</title>
-	<link rel="icon" href="/favicon.png" />
+	<link rel="icon" href="/logo.png" />
 </svelte:head>
 <ModeWatcher />
 <!-- <ProgressBar color="#7F57F1" /> -->

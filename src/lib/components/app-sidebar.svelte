@@ -11,7 +11,8 @@
 		Banknote,
 		BanknoteArrowDown,
 		Video,
-		Link
+		Link,
+		ArrowRightLeft
 	} from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
@@ -30,7 +31,8 @@
 		{ title: 'Payments', url: '/dashboard/payments', icon: Banknote },
 		{ title: 'Transactions', url: '/dashboard/transactions', icon: Banknote },
 		{ title: 'Expenses', url: '/dashboard/expenses', icon: BanknoteArrowDown },
-		{ title: 'Sales', url: '/dashboard/sales', icon: Link },
+		{ title: 'Affiliate', url: '/dashboard/affiliate', icon: Link },
+		{ title: 'Sales', url: '/dashboard/sales', icon: ArrowRightLeft },
 
 		{
 			title: 'My Account',
@@ -97,10 +99,10 @@
 	>
 		<Sidebar.Group>
 			<Sidebar.GroupLabel>
-				<img src="/logo.png" alt="Fro Admin" class="h-12 w-1/2 justify-self-center" />
+				<img src="/logo.png" alt="Fro Admin" class="h-12 w-1/2 justify-self-center dark:invert" />
 			</Sidebar.GroupLabel>
 			<Sidebar.GroupContent class="my-4">
-				<NavMain items={navigation} />
+				<NavMain {closeSidebar} items={navigation} />
 			</Sidebar.GroupContent>
 		</Sidebar.Group>
 	</Sidebar.Content>

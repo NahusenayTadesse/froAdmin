@@ -242,7 +242,7 @@
 									{/each}
 								</DropdownMenu.Content>
 							</DropdownMenu.Root>
-							<Pdf {fileName} tableId="#{uniqueTableId}" {data} />
+							<Pdf {fileName} {table} />
 							<Button variant="outline">
 								<ListOrdered />
 								{table.getFilteredRowModel().rows.length} Results

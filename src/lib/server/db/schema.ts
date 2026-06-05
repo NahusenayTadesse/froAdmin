@@ -574,3 +574,189 @@ export const affiliateWithdrawalRequests = pgTable(
 		)
 	]
 );
+
+export const salesPersonProfiles = pgTable(
+	'sales_person_profiles',
+	{
+		id: uuid('id').defaultRandom().primaryKey().notNull(),
+		userId: uuid('user_id')
+			.notNull()
+			.unique() // Enforces sales_person_profiles_user_id_key
+			.references(() => profiles.id, { onDelete: 'cascade' }),
+		currentTierId: uuid('current_tier_id').references(() => salesTiers.id, {
+			onDelete: 'set null'
+		}), // Maps nullable tier reference
+		status: text('status').default('active').notNull(),
+		canAlsoViewAffiliate: boolean('can_also_view_affiliate').default(true).notNull(),
+		totalSignups: integer('total_signups').default(0).notNull(),
+		totalEarnings: numeric('total_earnings', { precision: 12, scale: 2 }).default('0').notNull(),
+		pendingEarnings: numeric('pending_earnings', { precision: 12, scale: 2 })
+			.default('0')
+			.notNull(),
+		availableBalance: numeric('available_balance', { precision: 12, scale: 2 })
+			.default('0')
+			.notNull(),
+		metadata: jsonb('metadata').default({}).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+	},
+	(table) => {
+		return [
+			// Composite index: (user_id, status)
+			index('idx_sales_person_profiles_user_status').on(table.userId, table.status),
+
+			// Status array check constraint
+			check(
+				'sales_person_profiles_status_check',
+				sql`${table.status} = ANY(ARRAY['pending'::text, 'active'::text, 'suspended'::text, 'inactive'::text])`
+			),
+
+			// Multi-column balances check constraint
+			check(
+				'sales_person_profiles_money_check',
+				sql`${table.totalEarnings} >= 0 AND ${table.pendingEarnings} >= 0 AND ${table.availableBalance} >= 0`
+			),
+
+			// Total signups non-negative constraint
+			check('sales_person_profiles_total_signups_check', sql`${table.totalSignups} >= 0`)
+		];
+	}
+);
+
+export const salesCodes = pgTable(
+	'sales_codes',
+	{
+		id: uuid('id').defaultRandom().primaryKey().notNull(),
+		salesPersonId: uuid('sales_person_id')
+			.notNull()
+			// Replace with your actual salesPersonProfiles table reference if imported
+			.references(() => salesPersonProfiles.id, { onDelete: 'cascade' }),
+		code: text('code').notNull(),
+		isActive: boolean('is_active').default(true).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+		metadata: jsonb('metadata').default({}).notNull()
+	},
+	(table) => {
+		return [
+			// Case-insensitive unique index using lower(code)
+			uniqueIndex('idx_sales_codes_code_unique_ci').on(sql`lower(${table.code})`),
+
+			// Composite index: (sales_person_id, is_active, created_at desc)
+			index('idx_sales_codes_person_active').on(
+				table.salesPersonId,
+				table.isActive,
+				table.createdAt.desc()
+			),
+
+			// Check constraint for regex format
+			check('sales_codes_code_format_check', sql`${table.code} ~ '^[A-Za-z0-9_-]{3,40}$'`)
+		];
+	}
+);
+
+export const salesEarnings = pgTable(
+	'sales_earnings',
+	{
+		id: uuid('id').defaultRandom().primaryKey().notNull(),
+		salesPersonId: uuid('sales_person_id')
+			.notNull()
+			.references(() => salesPersonProfiles.id, { onDelete: 'cascade' }),
+		referralId: uuid('referral_id')
+			.notNull()
+			.unique() // Enforces the unique constraint sales_earnings_referral_id_key
+			.references(() => salesReferrals.id, { onDelete: 'cascade' }),
+		referredUserId: uuid('referred_user_id')
+			.notNull()
+			.references(() => profiles.id, { onDelete: 'cascade' }),
+		tierIdAtTime: uuid('tier_id_at_time').references(() => salesTiers.id, {
+			onDelete: 'set null'
+		}),
+		amount: numeric('amount', { precision: 12, scale: 2 }).default('0').notNull(),
+		bonusAmount: numeric('bonus_amount', { precision: 12, scale: 2 }).default('0').notNull(),
+		currency: text('currency').default('usd').notNull(),
+		status: text('status').default('pending').notNull(),
+		metadata: jsonb('metadata').default({}).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+	},
+	(table) => {
+		return [
+			// Composite index: (sales_person_id, created_at desc)
+			index('idx_sales_earnings_person_created').on(table.salesPersonId, table.createdAt.desc()),
+
+			// Status enum/array check constraint
+			check(
+				'sales_earnings_status_check',
+				sql`${table.status} = ANY(ARRAY['pending'::text, 'credited'::text, 'paid'::text, 'reversed'::text])`
+			),
+
+			// Financial limits check constraint
+			check('sales_earnings_money_check', sql`${table.amount} >= 0 AND ${table.bonusAmount} >= 0`)
+		];
+	}
+);
+
+export const salesTiers = pgTable(
+	'sales_tiers',
+	{
+		id: uuid('id').defaultRandom().primaryKey().notNull(),
+		name: text('name').notNull().unique(), // Enforces sales_tiers_name_key
+		minSignups: integer('min_signups').default(0).notNull(),
+		ratePerUser: numeric('rate_per_user', { precision: 12, scale: 2 }).default('0').notNull(),
+		bonusThreshold: integer('bonus_threshold'), // Nullable by default
+		bonusAmount: numeric('bonus_amount', { precision: 12, scale: 2 }).default('0').notNull(),
+		currency: text('currency').default('usd').notNull(),
+		isActive: boolean('is_active').default(true).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+	},
+	(table) => {
+		return [
+			// Composite Index: (is_active, min_signups desc)
+			index('idx_sales_tiers_active_min_signups').on(table.isActive, table.minSignups.desc()),
+
+			// Check constraints for non-negative values
+			check('sales_tiers_bonus_amount_check', sql`${table.bonusAmount} >= 0`),
+
+			check(
+				'sales_tiers_bonus_threshold_check',
+				sql`${table.bonusThreshold} IS NULL OR ${table.bonusThreshold} >= 0`
+			),
+
+			check('sales_tiers_min_signups_check', sql`${table.minSignups} >= 0`),
+
+			check('sales_tiers_rate_per_user_check', sql`${table.ratePerUser} >= 0`)
+		];
+	}
+);
+
+export const salesReferrals = pgTable(
+	'sales_referrals',
+	{
+		id: uuid('id').defaultRandom().primaryKey().notNull(),
+		salesPersonId: uuid('sales_person_id')
+			.notNull()
+			.references(() => salesPersonProfiles.id, { onDelete: 'cascade' }),
+		referredUserId: uuid('referred_user_id')
+			.notNull()
+			.unique() // Enforces the unique constraint sales_referrals_referred_user_id_key
+			.references(() => profiles.id, { onDelete: 'cascade' }),
+		salesCode: text('sales_code'), // Nullable by default
+		attributionSource: text('attribution_source').default('manual_code').notNull(),
+		metadata: jsonb('metadata').default({}).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
+	},
+	(table) => {
+		return [
+			// Composite index: (sales_person_id, created_at desc)
+			index('idx_sales_referrals_person_created').on(table.salesPersonId, table.createdAt.desc()),
+
+			// Attribution source enum/array check constraint
+			check(
+				'sales_referrals_source_check',
+				sql`${table.attributionSource} = ANY(ARRAY['manual_code'::text, 'sales_link'::text, 'admin'::text, 'unknown'::text])`
+			)
+		];
+	}
+);

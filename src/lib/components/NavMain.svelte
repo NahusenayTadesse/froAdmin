@@ -5,7 +5,8 @@
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import { sidebarMenuButtonVariants } from './ui/sidebar/sidebar-menu-button.svelte';
 	let {
-		items
+		items,
+		closeSidebar
 	}: {
 		items: {
 			title: string;
@@ -20,6 +21,7 @@
 				icon?: any;
 			}[];
 		}[];
+		closeSidebar?: () => void;
 	} = $props();
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
@@ -53,7 +55,12 @@
 				<Collapsible.Root open={item.isActive} class="group/collapsible">
 					{#snippet child({ props })}
 						<Sidebar.MenuItem {...props}>
-							<Collapsible.Trigger onclick={() => goto(item.url)}>
+							<Collapsible.Trigger
+								onclick={() => {
+									goto(item.url);
+									closeSidebar();
+								}}
+							>
 								{#snippet child({ props })}
 									<Sidebar.MenuButton
 										{...props}
@@ -86,7 +93,12 @@
 												tooltipContent={subItem.title}
 											>
 												{#snippet child({ props })}
-													<a href={subItem.url} {...props} transition:slide|global>
+													<a
+														href={subItem.url}
+														onclick={closeSidebar}
+														{...props}
+														transition:slide|global
+													>
 														{#if subItem.icon}
 															<subItem.icon class="h-4 w-4" />
 														{/if}
@@ -109,7 +121,7 @@
 							variant={variantChecker(item.url) ? 'outline' : 'default'}
 						>
 							{#snippet child({ props })}
-								<a href={item.url} {...props}>
+								<a href={item.url} onclick={closeSidebar} {...props}>
 									<item.icon class="h-5! w-5!" />
 									<span>{item.title}</span>
 								</a>
