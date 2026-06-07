@@ -13,7 +13,7 @@
 	import { superForm } from 'sveltekit-superforms/client';
 
 	import LoadingBtn from '$lib/formComponents/LoadingBtn.svelte';
-	import { ArrowLeft, CalendarClock, Pencil, Save } from '@lucide/svelte';
+	import { ArrowLeft, BanknoteArrowUp, Link, Pencil, Save } from '@lucide/svelte';
 	import type { Snapshot } from '@sveltejs/kit';
 
 	import Delete from '$lib/forms/Delete.svelte';
@@ -41,70 +41,70 @@
 		}).format(d);
 	};
 	// import { columns } from './columns.js';
-	let affiliate = $derived(data?.affiliate);
+	let salesPerson = $derived(data?.salesPerson);
 
 	// Formatted array for summary lists, sidebars, or metadata tables
 	const singleTable = $derived([
 		{
-			name: 'Affiliate Code',
-			value: affiliate?.activeCode || '—'
+			name: 'Name',
+			value: salesPerson?.name || '—'
+		},
+		{
+			name: 'Email',
+			value: salesPerson?.email || '—'
+		},
+
+		{
+			name: 'Status',
+			value: salesPerson?.status || '—'
+		},
+		{
+			name: 'Sales Code',
+			value: salesPerson?.salesCode || '—'
 		},
 		{
 			name: 'Code Status',
-			value: affiliate?.isCodeActive ? 'Active' : 'Inactive'
+			value: salesPerson?.codeIsActive ? 'Active' : 'Inactive'
 		},
 		{
-			name: 'Lifetime Gross Earnings',
-			value: affiliate?.lifetimeGrossEarned ? `$${affiliate.lifetimeGrossEarned}` : '$0.00'
+			name: 'Can View Affiliate',
+			value: salesPerson?.canAlsoViewAffiliate ? 'Yes' : 'No'
 		},
 		{
-			name: 'Total Paid Out',
-			value: affiliate?.lifetimePaidOut ? `$${affiliate.lifetimePaidOut}` : '$0.00'
+			name: 'Current Tier',
+			value: salesPerson?.tierName || '—'
 		},
 		{
-			name: 'Available (Payable)',
-			value: affiliate?.payableAmount ? `$${affiliate.payableAmount}` : '$0.00'
+			name: 'Rate Per Signup',
+			value: salesPerson?.tierRatePerUser ? `$${salesPerson.tierRatePerUser}` : '—'
 		},
 		{
-			name: 'Escrow Hold Balance',
-			value: affiliate?.pendingHoldAmount ? `$${affiliate.pendingHoldAmount}` : '$0.00'
+			name: 'Bonus Threshold',
+			value: salesPerson?.tierBonusThreshold ? `${salesPerson.tierBonusThreshold} signups` : '—'
 		},
 		{
-			name: 'Total Conversions Count',
-			value: affiliate?.totalReferralEventsCount ?? 0
+			name: 'Bonus Amount',
+			value: salesPerson?.tierBonusAmount ? `$${salesPerson.tierBonusAmount}` : '—'
 		},
 		{
-			name: 'Unique Referred Customers',
-			value: affiliate?.uniqueReferredUsersCount ?? 0
+			name: 'Total Signups',
+			value: salesPerson?.totalSignups ?? '—'
 		},
 		{
-			name: 'Last Batch Payout Net',
-			value: affiliate?.lastBatchNet ? `$${affiliate.lastBatchNet}` : 'No recent automated batches'
+			name: 'Total Earnings',
+			value: salesPerson?.totalEarnings ? `$${salesPerson.totalEarnings}` : '—'
 		},
 		{
-			name: 'Last Batch Status',
-			value: affiliate?.lastBatchStatus
-				? affiliate.lastBatchStatus.charAt(0).toUpperCase() + affiliate.lastBatchStatus.slice(1)
-				: '—'
+			name: 'Pending Earnings',
+			value: salesPerson?.pendingEarnings ? `$${salesPerson.pendingEarnings}` : '—'
 		},
 		{
-			name: 'Recent Withdrawal Status',
-			value: affiliate?.latestWithdrawalStatus
-				? affiliate.latestWithdrawalStatus.charAt(0).toUpperCase() +
-					affiliate.latestWithdrawalStatus.slice(1)
-				: 'No recent manual requests'
+			name: 'Available Balance',
+			value: salesPerson?.availableBalance ? `$${salesPerson.availableBalance}` : '—'
 		},
 		{
-			name: 'Recent Withdrawal Amount',
-			value: affiliate?.latestWithdrawalAmount ? `$${affiliate.latestWithdrawalAmount}` : '—'
-		},
-		{
-			name: 'Recent Withdrawal Action Date',
-			value: affiliate?.latestWithdrawalDate ? formatDate(affiliate.latestWithdrawalDate) : '—'
-		},
-		{
-			name: 'Withdrawal Notes / Failures',
-			value: affiliate?.latestWithdrawalFailure || 'None'
+			name: 'Member Since',
+			value: salesPerson?.createdAt ? new Date(salesPerson.createdAt).toLocaleDateString() : '—'
 		}
 	]);
 
@@ -133,29 +133,29 @@
 	//   let date = $derived(dateProxy(editForm, 'appointmentDate', { format: 'date'}));
 
 	let edit = $state(false);
-
-	$form.code = affiliate?.activeCode;
-	$form.isCodeActive = affiliate?.isCodeActive;
-	$form.customCommissionBps = affiliate?.customCommissionBps;
-	$form.manualAdjustmentAmount = affiliate?.manualAdjustmentAmount;
-	$form.adminNotes = affiliate?.adminNotes;
 </script>
 
 <svelte:head>
-	<title>Affiliate Configuration</title>
+	<title>Sales Person Configuration</title>
 </svelte:head>
 
-<SingleView title="Affiliate Management" class="w-full!">
+<SingleView title="Sales Person" class="w-full!">
 	<div class="mt-4 flex w-full flex-row items-start justify-start gap-2 pl-4">
 		<Button onclick={() => (edit = !edit)}>
 			{#if !edit}
 				<Pencil class="h-4 w-4" />
-				Edit Affiliate Profile
+				Edit
 			{:else}
 				<ArrowLeft class="h-4 w-4" />
-				Back to Overview
+				Back
 			{/if}
 		</Button>
+		<Button href="/dashboard/sales/single/{page.params.id}/earnings">
+			<BanknoteArrowUp /> Earnings</Button
+		>
+		<Button href="/dashboard/sales/single/{page.params.id}/referrals">
+			<Link /> Referrals</Button
+		>
 	</div>
 
 	{#if edit === false}
@@ -260,27 +260,3 @@
 </SingleView>
 
 <br />
-
-<div
-	class="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950"
->
-	<div class="flex flex-col gap-1">
-		<h2 class="text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-50">
-			Historical Commission Logs
-		</h2>
-		<p class="text-sm text-slate-500 dark:text-slate-400">
-			Chronological look back at transaction logs, batch statements, and pending actions recorded
-			under this profile.
-		</p>
-	</div>
-
-	<div class="rounded-md border border-slate-100 dark:border-slate-800">
-		{#if data?.affiliates?.length}
-			<DataTable data={data.affiliates} {columns} fileName="Affiliate Registry" />
-		{:else}
-			<div class="flex h-32 items-center justify-center text-sm text-slate-500">
-				No conversion ledger events found on record for this user profile.
-			</div>
-		{/if}
-	</div>
-</div>

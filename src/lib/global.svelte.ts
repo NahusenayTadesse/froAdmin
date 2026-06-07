@@ -173,3 +173,12 @@ export const formatDate = (dateInput: Date | string | number): string => {
 		year: 'numeric'
 	});
 };
+
+export const formatCurrency = (amount: number): string => {
+	return new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: 'USD',
+		currencyDisplay: 'symbol',
+		minimumFractionDigits: 2
+	}).format(Number(amount));
+};

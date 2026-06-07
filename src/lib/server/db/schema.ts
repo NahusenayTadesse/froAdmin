@@ -24,7 +24,7 @@ export const profiles = pgTable('profiles', {
 	role: text('role').default('customer').notNull(),
 	firstName: text('first_name'),
 	lastName: text('last_name'),
-	email: text('email'),
+	email: text('email').unique(),
 	phoneNumber: text('phone_number'),
 	profilePhotoUrl: text('profile_photo_url'),
 	bio: text('bio'),
@@ -45,7 +45,8 @@ export const profiles = pgTable('profiles', {
 	banned: boolean('banned'),
 	banReason: text('ban_reason'),
 	bannedAt: timestamp('banned_at', { withTimezone: true }),
-	bannedBy: uuid('banned_by')
+	bannedBy: uuid('banned_by'),
+	username: text('username')
 });
 
 // --- Roles ---

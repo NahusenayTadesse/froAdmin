@@ -18,6 +18,12 @@
 		variant={page.url.pathname === '/dashboard/sales/add' ? 'default' : 'outline'}
 		><Plus /> Add Sales Person</Button
 	>
+
+	<Button
+		href="/dashboard/sales/tiers"
+		variant={page.url.pathname === '/dashboard/sales/tiers' ? 'default' : 'outline'}
+		><Sheet /> Sales Tiers</Button
+	>
 </div>
 
 {@render children?.()}

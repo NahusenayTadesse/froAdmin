@@ -26,7 +26,7 @@ export const columns = [
 			return renderComponent(DataTableLinks, {
 				id: row.original.affiliateUserId,
 				name: row.original.activeCode,
-				link: '/dashboard/sales/single'
+				link: '/dashboard/affiliate/single'
 			});
 		}
 	},

@@ -85,12 +85,12 @@
 	}
 </script>
 
-<Sidebar.Root collapsible="offcanvas" {...restProps}>
+<Sidebar.Root class="w-1/2! lg:w-1/6!" collapsible="offcanvas" {...restProps}>
 	<Sidebar.Content
-		class="z-9999! h-full
-  [scrollbar-width:thin] [scrollbar-color:#a3a3a3_transparent]
-  overflow-y-scroll
+		class="z-9999! h-full  scrollbar-thin
+  [scrollbar-color:#a3a3a3_transparent] overflow-y-scroll
   pt-4
+
   [&::-webkit-scrollbar]:w-2
   [&::-webkit-scrollbar-thumb]:bg-gray-400
   [&::-webkit-scrollbar-thumb:hover]:bg-gray-500 [&::-webkit-scrollbar-track]:bg-transparent

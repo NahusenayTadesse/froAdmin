@@ -64,6 +64,37 @@
 	function goNext() {
 		if (currentIndex < rows.length - 1) currentIndex++;
 	}
+
+	let touchStartY = $state(0);
+	let touchEndY = $state(0);
+	const minSwipeDistance = 50; // Minimum pixels to qualify as a swipe
+
+	function handleTouchStart(e: TouchEvent) {
+		touchStartY = e.touches[0].screenY;
+	}
+
+	function handleTouchMove(e: TouchEvent) {
+		// Prevents elastic bouncing/scrolling the underlying page while swiping the video
+		if (e.cancelable) e.preventDefault();
+	}
+
+	function handleTouchEnd(e: TouchEvent) {
+		touchEndY = e.changedTouches[0].screenY;
+		handleSwipeGesture();
+	}
+
+	function handleSwipeGesture() {
+		const distance = touchStartY - touchEndY;
+
+		// Swipe Up -> Next Video (Distance is positive)
+		if (distance > minSwipeDistance) {
+			goNext();
+		}
+		// Swipe Down -> Previous Video (Distance is negative)
+		else if (distance < -minSwipeDistance) {
+			goPrev();
+		}
+	}
 </script>
 
 <Dialog.Root bind:open>
@@ -122,14 +153,14 @@
 	</Dialog.Trigger>
 
 	<!-- MODAL CONTENT -->
-	<Dialog.Content class="gap-0 overflow-hidden p-0 sm:max-w-200">
+	<Dialog.Content class="gap-0 overflow-hidden p-0 ">
 		<Dialog.Header class="border-b bg-muted/30 p-4">
 			<div class="flex items-center gap-2">
 				<Video class="h-4 w-4 text-primary" />
 				<Dialog.Title class="text-base font-medium">{currentLabel ?? 'Video Preview'}</Dialog.Title>
 			</div>
 		</Dialog.Header>
-		<div class="my-2 flex flex-row items-start justify-start px-2">
+		<div class="my-2 flex flex-row flex-wrap items-start justify-start px-2">
 			<Edit
 				data={form}
 				name="Discoverablity"
@@ -159,7 +190,13 @@
 			/>
 		</div>
 
-		<div class="aspect-video w-full bg-black">
+		<div
+			class="aspect-video w-full bg-black"
+			ontouchstart={handleTouchStart}
+			ontouchend={handleTouchEnd}
+			role="region"
+			aria-label="Video player swipe controls. Swipe up for next video, swipe down for previous video."
+		>
 			<video
 				bind:this={modalVideoEl}
 				src={currentSrc}
