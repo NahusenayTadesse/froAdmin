@@ -119,20 +119,44 @@ export const userPermissions = pgTable('user_permissions', {
 
 // --- Services & Categories ---
 
-export const serviceCategories = pgTable('service_categories', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	name: text('name').notNull(),
-	imageUrl: text('image_url'),
-	description: text('description'),
-	isPopular: boolean('is_popular').default(false),
-	sortOrder: integer('sort_order').default(0),
-	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-	allowImages: boolean('allow_images').default(true).notNull(),
-	requiresBeforeImage: boolean('requires_before_image').default(false).notNull(),
-	requiresAfterImage: boolean('requires_after_image').default(false).notNull(),
-	status: boolean('status').default(true).notNull()
-});
+// export const serviceCategories = pgTable('service_categories', {
+// 	id: uuid('id').primaryKey().defaultRandom(),
+// 	name: text('name').notNull(),
+// 	imageUrl: text('image_url'),
+// 	description: text('description'),
+// 	isPopular: boolean('is_popular').default(false),
+// 	sortOrder: integer('sort_order').default(0),
+// 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+// 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+// 	allowImages: boolean('allow_images').default(true).notNull(),
+// 	requiresBeforeImage: boolean('requires_before_image').default(false).notNull(),
+// 	requiresAfterImage: boolean('requires_after_image').default(false).notNull(),
+// 	status: boolean('status').default(true).notNull()
+// });
+
+export const serviceCategories = pgTable(
+	'service_categories',
+	{
+		id: uuid('id').primaryKey().defaultRandom().notNull(),
+		name: text('name').notNull(),
+		imageUrl: text('image_url'),
+		description: text('description'),
+		isPopular: boolean('is_popular').default(false),
+		sortOrder: integer('sort_order').default(0),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+		allowImages: boolean('allow_images').default(true).notNull(),
+		requiresBeforeImage: boolean('requires_before_image').default(false).notNull(),
+		requiresAfterImage: boolean('requires_after_image').default(false).notNull()
+	},
+	(table) => [
+		// Replicating your CHECK constraint for image policy consistency
+		check(
+			'service_categories_image_policy_consistency_check',
+			sql`((NOT ${table.requiresBeforeImage} OR ${table.allowImages}) AND (NOT ${table.requiresAfterImage} OR ${table.allowImages}))`
+		)
+	]
+);
 
 export const services = pgTable('services', {
 	id: uuid('id').primaryKey().defaultRandom(),

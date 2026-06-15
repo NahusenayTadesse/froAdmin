@@ -1,12 +1,53 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { db } from '$lib/server/db'; // Your Drizzle DB instance
-import { salesPersonProfiles, salesTiers, salesCodes, salesReferrals } from '$lib/server/db/schema';
-import { eq, sql, desc } from 'drizzle-orm';
 
-export const load: PageServerLoad = async () => {
+import { db } from '$lib/server/db';
+import { salesPersonProfiles, salesTiers, salesCodes, salesReferrals } from '$lib/server/db/schema';
+
+import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
+
+function getStringParam(url: URL, key: string, fallback = '') {
+	return url.searchParams.get(key)?.trim() ?? fallback;
+}
+
+export const load: PageServerLoad = async ({ url }) => {
 	try {
-		const salesPersonsQuery = await db
+		const search = getStringParam(url, 'search');
+		const status = getStringParam(url, 'status');
+		const tierId = getStringParam(url, 'tierId');
+		const activeCode = getStringParam(url, 'activeCode');
+
+		const whereConditions = and(
+			status ? eq(salesPersonProfiles.status, status) : undefined,
+
+			tierId ? eq(salesPersonProfiles.currentTierId, tierId) : undefined,
+
+			activeCode
+				? sql<boolean>`EXISTS (
+						SELECT 1
+						FROM ${salesCodes}
+						WHERE ${salesCodes.salesPersonId} = ${salesPersonProfiles.id}
+						AND ${salesCodes.isActive} = true
+						AND ${salesCodes.code} ILIKE ${`%${activeCode}%`}
+					)`
+				: undefined,
+
+			search
+				? or(
+						ilike(sql<string>`${salesPersonProfiles.id}::text`, `%${search}%`),
+						ilike(sql<string>`${salesPersonProfiles.userId}::text`, `%${search}%`),
+
+						sql<boolean>`EXISTS (
+							SELECT 1
+							FROM ${salesCodes}
+							WHERE ${salesCodes.salesPersonId} = ${salesPersonProfiles.id}
+							AND ${salesCodes.code} ILIKE ${`%${search}%`}
+						)`
+					)
+				: undefined
+		);
+
+		const salesPersonsQuery = db
 			.select({
 				id: salesPersonProfiles.id,
 				userId: salesPersonProfiles.userId,
@@ -16,9 +57,10 @@ export const load: PageServerLoad = async () => {
 				pendingEarnings: salesPersonProfiles.pendingEarnings,
 				availableBalance: salesPersonProfiles.availableBalance,
 				createdAt: salesPersonProfiles.createdAt,
+
 				tierName: salesTiers.name,
 				tierRate: salesTiers.ratePerUser,
-				// Aggregate active codes into a string array so it doesn't multiply rows
+
 				activeCodes: sql<string[]>`COALESCE(
 					(
 						SELECT array_agg(${salesCodes.code})
@@ -28,7 +70,7 @@ export const load: PageServerLoad = async () => {
 					),
 					ARRAY[]::text[]
 				)`,
-				// Subquery for conversions in the last 30 days to show recent performance momentum
+
 				recentSignups30Days: sql<number>`(
 					SELECT count(*)::int
 					FROM ${salesReferrals}
@@ -38,21 +80,42 @@ export const load: PageServerLoad = async () => {
 			})
 			.from(salesPersonProfiles)
 			.leftJoin(salesTiers, eq(salesPersonProfiles.currentTierId, salesTiers.id))
+			.where(whereConditions)
 			.orderBy(desc(salesPersonProfiles.createdAt));
 
-		// 4. Get total count for pagination metadata
-		const countQuery = await db
-			.select({ count: sql<number>`count(*)::int` })
-			.from(salesPersonProfiles);
+		const countQuery = db
+			.select({
+				count: sql<number>`count(*)::int`
+			})
+			.from(salesPersonProfiles)
+			.where(whereConditions);
 
-		// Run concurrently to avoid sequential network waterfall overhead
-		const [salesPersons, totalCountResult] = await Promise.all([salesPersonsQuery, countQuery]);
+		const tierListQuery = db
+			.select({
+				value: salesTiers.id,
+				name: salesTiers.name
+			})
+			.from(salesTiers)
+			.orderBy(salesTiers.name);
+
+		const [salesPersons, totalCountResult, tierList] = await Promise.all([
+			salesPersonsQuery,
+			countQuery,
+			tierListQuery
+		]);
 
 		const totalCount = totalCountResult[0]?.count ?? 0;
 
 		return {
 			salesPersons,
-			totalCount
+			totalCount,
+			tierList,
+			query: {
+				search,
+				status,
+				tierId,
+				activeCode
+			}
 		};
 	} catch (err) {
 		console.error('Failed to load admin sales dashboard data:', err);

@@ -1,114 +1,178 @@
-<script lang="ts" generics="T extends Record<string, any> = Record<string, any>">
+<script lang="ts" generics="T extends Record<string, unknown> = Record<string, unknown>">
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Separator } from '$lib/components/ui/separator';
 	import { Input } from '$lib/components/ui/input';
-	import DateMonth from './date-month.svelte'; // Keeping your custom date picker component
-	import { XIcon, Funnel, Calendar1, Search, List } from '@lucide/svelte';
+	import Label from './ui/label/label.svelte';
+	import DateMonth from './date-month.svelte';
+
+	import { XIcon, Funnel, Calendar1, Search, List, SlidersHorizontal } from '@lucide/svelte';
+
 	import {
 		getLocalTimeZone,
 		today,
 		type CalendarDate,
 		CalendarDate as CDate
 	} from '@internationalized/date';
-	import type { Snippet } from 'svelte';
-	import Label from './ui/label/label.svelte';
 
-	// Define standard, reusable payload structure for database/API queries
-	export interface QueryFilterPayload {
+	import type { Snippet } from 'svelte';
+
+	export interface QueryFilterPayload<T extends Record<string, unknown>> {
 		search: string;
 		pageSize: number;
-		dateRange: { start: CalendarDate; end: CalendarDate } | null;
+		dateRange: {
+			start: CalendarDate;
+			end: CalendarDate;
+		} | null;
 		customFilters: T;
 	}
 
 	interface Props {
 		title?: string;
 		description?: string;
-		showDate?: boolean;
 
-		// Initial values or bindings
+		showDate?: boolean;
+		showSearch?: boolean;
+		showPageSize?: boolean;
+
 		initialSearch?: string;
 		initialPageSize?: number;
-		start?: string; // ISO string format preferred for inputs
-		end?: string;
-
-		// Custom filter initial state
+		initialStart?: string;
+		initialEnd?: string;
 		initialCustomFilters?: T;
 
-		// Event handler
-		onQueryChange?: (payload: QueryFilterPayload) => void;
+		pageSizes?: number[];
 
-		// Children snippet to inject domain-specific dropdowns or inputs
-		children?: Snippet<[T, (key: keyof T, value: any) => void]>;
+		/**
+		 * manual = emit only when search form is submitted, page size/date/custom filter changes, or clear all
+		 * change = emit whenever search input changes too
+		 */
+		submitMode?: 'manual' | 'change';
+
+		searchPlaceholder?: string;
+
+		onQueryChange?: (payload: QueryFilterPayload<T>) => void;
+
+		/**
+		 * Inject your module-specific filters here.
+		 *
+		 * Example:
+		 * {#snippet children(filters, update)}
+		 *   <Select value={filters.status as string} onValueChange={(v) => update('status', v)}>
+		 *     ...
+		 *   </Select>
+		 * {/snippet}
+		 */
+		children?: Snippet<[T, <K extends keyof T>(key: K, value: T[K]) => void]>;
 	}
 
 	let {
 		title = 'Query Builder',
 		description = 'Filter, search, and manage dataset limits',
+
 		showDate = false,
+		showSearch = true,
+		showPageSize = true,
+
 		initialSearch = '',
 		initialPageSize = 20,
-		start,
-		end,
+		initialStart,
+		initialEnd,
 		initialCustomFilters = {} as T,
+
+		pageSizes = [10, 20, 50, 100],
+
+		submitMode = 'manual',
+		searchPlaceholder = 'Search rows...',
+
 		onQueryChange,
 		children
 	}: Props = $props();
 
-	// --- State ---
-	let search = $derived(initialSearch);
-	let pageSize = $derived(initialPageSize);
-	let customFilters = $derived<T>({ ...initialCustomFilters });
-
-	// Parse initial native date strings into component-compatible CalendarDates safely
 	const defaultDate = today(getLocalTimeZone());
-	let dateRange = $derived<{ start: CalendarDate; end: CalendarDate }>({
-		start: start
-			? new CDate(
-					new Date(start).getFullYear(),
-					new Date(start).getMonth() + 1,
-					new Date(start).getDate()
-				)
-			: defaultDate,
-		end: end
-			? new CDate(
-					new Date(end).getFullYear(),
-					new Date(end).getMonth() + 1,
-					new Date(end).getDate()
-				)
-			: defaultDate
+
+	let search = $state(initialSearch);
+	let pageSize = $state(initialPageSize);
+	let customFilters = $state<T>({ ...initialCustomFilters });
+
+	let dateRange = $state<{ start: CalendarDate; end: CalendarDate }>({
+		start: parseCalendarDate(initialStart) ?? defaultDate,
+		end: parseCalendarDate(initialEnd) ?? defaultDate
 	});
 
-	// --- Derived / Computed Values ---
+	const hasCustomFilters = $derived(Object.keys(customFilters).length > 0);
+
 	const activeFilterCount = $derived(
 		[
-			search.trim() !== '',
-			pageSize !== 20,
-			...Object.values(customFilters).map((val) => val !== '' && val !== null && val !== undefined)
+			showSearch && search.trim() !== '',
+			showPageSize && pageSize !== initialPageSize,
+			showDate && hasDateChanged(),
+			...Object.entries(customFilters).map(([key, value]) => {
+				const initialValue = initialCustomFilters[key as keyof T];
+				return !isEmptyFilterValue(value) && value !== initialValue;
+			})
 		].filter(Boolean).length
 	);
 
-	// Debounce or dispatch changes seamlessly
-	function emitChange() {
-		onQueryChange?.({
+	function parseCalendarDate(value?: string): CalendarDate | null {
+		if (!value) return null;
+
+		const date = new Date(value);
+
+		if (Number.isNaN(date.getTime())) {
+			return null;
+		}
+
+		return new CDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+	}
+
+	function isEmptyFilterValue(value: unknown): boolean {
+		if (value === null || value === undefined || value === '') return true;
+		if (Array.isArray(value) && value.length === 0) return true;
+		return false;
+	}
+
+	function hasDateChanged(): boolean {
+		const initialDateStart = parseCalendarDate(initialStart) ?? defaultDate;
+		const initialDateEnd = parseCalendarDate(initialEnd) ?? defaultDate;
+
+		return (
+			dateRange.start.compare(initialDateStart) !== 0 || dateRange.end.compare(initialDateEnd) !== 0
+		);
+	}
+
+	function getPayload(): QueryFilterPayload<T> {
+		return {
 			search: search.trim(),
 			pageSize,
 			dateRange: showDate ? dateRange : null,
-			customFilters: $state.snapshot(customFilters) // Safely unwrap reactive proxy state
-		});
+			customFilters: $state.snapshot(customFilters) as T
+		};
 	}
 
-	// --- Actions & Triggers ---
-	function handleSearchInput(e?: Event) {
-		e?.preventDefault();
+	function emitChange() {
+		onQueryChange?.(getPayload());
+	}
+
+	function handleSearchSubmit(event?: Event) {
+		event?.preventDefault();
 		emitChange();
 	}
 
+	function handleSearchInput() {
+		if (submitMode === 'change') {
+			emitChange();
+		}
+	}
+
 	function handlePageSizeChange(value: string) {
-		pageSize = Number(value);
+		const nextPageSize = Number(value);
+
+		if (Number.isNaN(nextPageSize)) return;
+
+		pageSize = nextPageSize;
 		emitChange();
 	}
 
@@ -117,28 +181,23 @@
 		emitChange();
 	}
 
-	function updateCustomFilter(key: keyof T, value: any) {
+	function updateCustomFilter<K extends keyof T>(key: K, value: T[K]) {
 		customFilters[key] = value;
 		emitChange();
 	}
 
 	function clearAllFilters() {
 		search = '';
-		pageSize = 20;
-		// Reset keys of custom filters to empty strings
-		for (const key in customFilters) {
-			customFilters[key] = '' as any;
-		}
+		pageSize = initialPageSize;
+		customFilters = { ...initialCustomFilters };
+
+		dateRange = {
+			start: parseCalendarDate(initialStart) ?? defaultDate,
+			end: parseCalendarDate(initialEnd) ?? defaultDate
+		};
+
 		emitChange();
 	}
-
-	const pageCounts = [10, 20, 50, 100];
-
-	let value: number = $state(20);
-
-	const triggerContent = $derived(
-		pageCounts?.find((f) => String(f) === String(value)) ?? 'Select Page Count'
-	);
 </script>
 
 <Card class="w-full border-border/50 shadow-lg">
@@ -148,6 +207,7 @@
 				<div class="flex size-9 items-center justify-center rounded-lg bg-primary/10">
 					<Funnel class="size-4 text-primary" />
 				</div>
+
 				<div>
 					<CardTitle class="text-lg">{title}</CardTitle>
 					<p class="text-sm text-muted-foreground">{description}</p>
@@ -157,9 +217,11 @@
 			{#if activeFilterCount > 0}
 				<div class="flex items-center gap-2 self-end sm:self-auto">
 					<Badge variant="secondary" class="font-medium">
-						{activeFilterCount} active modifier{activeFilterCount > 1 ? 's' : ''}
+						{activeFilterCount} active filter{activeFilterCount > 1 ? 's' : ''}
 					</Badge>
+
 					<Button
+						type="button"
 						variant="ghost"
 						size="sm"
 						class="h-8 px-2 text-muted-foreground hover:text-foreground"
@@ -177,47 +239,62 @@
 
 	<CardContent class="pt-6">
 		<div class="grid grid-cols-1 items-end gap-4 sm:grid-cols-2 lg:grid-cols-4">
-			<div class="flex flex-col gap-2">
-				<Label for="search" class="flex items-center gap-2 text-sm font-medium text-foreground">
-					<Search class="size-3.5 text-muted-foreground" />
-					Search
-				</Label>
-				<div class="relative w-full">
-					<form onsubmit={handleSearchInput}>
+			{#if showSearch}
+				<div class="flex flex-col gap-2">
+					<Label
+						for="query-search"
+						class="flex items-center gap-2 text-sm font-medium text-foreground"
+					>
+						<Search class="size-3.5 text-muted-foreground" />
+						Search
+					</Label>
+
+					<form onsubmit={handleSearchSubmit}>
 						<Input
-							id="search"
+							id="query-search"
 							type="search"
-							placeholder="Search rows..."
+							placeholder={searchPlaceholder}
 							bind:value={search}
+							oninput={handleSearchInput}
 							class="w-full"
 						/>
 					</form>
 				</div>
-			</div>
+			{/if}
 
-			<div class="flex flex-col gap-2">
-				<label for="pageSize" class="flex items-center gap-2 text-sm font-medium text-foreground">
-					<List class="size-3.5 text-muted-foreground" />
-					Page Size
-				</label>
-				<Select type="single" bind:value onValueChange={handlePageSizeChange}>
-					<SelectTrigger id="pageSize" class="w-full">
-						{triggerContent} per page
-					</SelectTrigger>
-					<SelectContent>
-						{#each pageCounts as count (count)}
-							<SelectItem value={String(count)}>{count} per page</SelectItem>
-						{/each}
-					</SelectContent>
-				</Select>
-			</div>
+			{#if showPageSize}
+				<div class="flex flex-col gap-2">
+					<Label
+						for="query-page-size"
+						class="flex items-center gap-2 text-sm font-medium text-foreground"
+					>
+						<List class="size-3.5 text-muted-foreground" />
+						Page Size
+					</Label>
+
+					<Select type="single" value={String(pageSize)} onValueChange={handlePageSizeChange}>
+						<SelectTrigger id="query-page-size" class="w-full">
+							{pageSize} per page
+						</SelectTrigger>
+
+						<SelectContent>
+							{#each pageSizes as count (count)}
+								<SelectItem value={String(count)}>
+									{count} per page
+								</SelectItem>
+							{/each}
+						</SelectContent>
+					</Select>
+				</div>
+			{/if}
 
 			{#if showDate}
 				<div class="flex flex-col gap-2 sm:col-span-2 lg:col-span-2">
-					<label class="flex items-center gap-2 text-sm font-medium text-foreground">
+					<Label class="flex items-center gap-2 text-sm font-medium text-foreground">
 						<Calendar1 class="size-3.5 text-muted-foreground" />
 						Date Range
-					</label>
+					</Label>
+
 					<DateMonth
 						start={dateRange.start}
 						end={dateRange.end}
@@ -229,6 +306,11 @@
 
 			{#if children}
 				{@render children(customFilters, updateCustomFilter)}
+			{:else if hasCustomFilters}
+				<div class="flex items-center gap-2 text-sm text-muted-foreground">
+					<SlidersHorizontal class="size-3.5" />
+					Custom filters configured, but no filter UI provided.
+				</div>
 			{/if}
 		</div>
 	</CardContent>

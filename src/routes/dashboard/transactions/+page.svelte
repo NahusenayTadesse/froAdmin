@@ -17,19 +17,19 @@
 
 	let { data } = $props();
 
-	let filteredList = $derived(data?.allExpenses);
+	let filteredList = $derived(data?.allTransactions);
 
-	type ExpenseQueryFilters = {
-		expenseTypeId: string;
-		addedById: string;
+	type TransactionQueryFilters = {
+		type: string;
+		status: string;
 	};
 
-	const initialCustomFilters: ExpenseQueryFilters = {
-		expenseTypeId: data.query.expenseTypeId ?? '',
-		addedById: data.query.addedById ?? ''
+	const initialCustomFilters: TransactionQueryFilters = {
+		type: data.query.type ?? '',
+		status: data.query.status ?? ''
 	};
 
-	function updateUrl(payload: QueryFilterPayload<ExpenseQueryFilters>) {
+	function updateUrl(payload: QueryFilterPayload<TransactionQueryFilters>) {
 		const params = new URLSearchParams(page.url.searchParams);
 
 		setOrDelete(params, 'search', payload.search);
@@ -39,8 +39,8 @@
 			setOrDelete(params, 'end', payload.dateRange.end.toString());
 		}
 
-		setOrDelete(params, 'expenseTypeId', payload.customFilters.expenseTypeId);
-		setOrDelete(params, 'addedById', payload.customFilters.addedById);
+		setOrDelete(params, 'type', payload.customFilters.type);
+		setOrDelete(params, 'status', payload.customFilters.status);
 
 		goto(`?${params.toString()}`, {
 			keepFocus: true,
@@ -64,16 +64,14 @@
 </script>
 
 <svelte:head>
-	<title>Expenses</title>
+	<title>Transactions</title>
 </svelte:head>
 
-<div class="mx-auto flex w-full max-w-6xl flex-col justify-start gap-8 p-6">
+<div class="mx-auto flex w-full flex-col justify-start gap-8 p-6">
 	<div class="flex flex-col gap-4">
 		<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
 			<div>
-				<p class="mt-1 text-muted-foreground">
-					Reviewing {data.allExpenses?.length ?? 0} expenses
-				</p>
+				<h1 class="text-3xl font-bold tracking-tight">Transactions History</h1>
 			</div>
 		</div>
 	</div>
@@ -81,8 +79,8 @@
 	<hr class="border-border" />
 
 	<QueryBuilder
-		title="Expenses Dataset"
-		description="Load expenses by reporting period, type, admin, or reason"
+		title="Transactions Dataset"
+		description="Load transactions by date range, type, status, description, or booking ID"
 		showDate
 		showPageSize={false}
 		initialSearch={data.query.search}
@@ -90,63 +88,59 @@
 		initialEnd={data.query.end}
 		{initialCustomFilters}
 		submitMode="manual"
-		searchPlaceholder="Search reason, expense type, or admin name..."
+		searchPlaceholder="Search description, booking ID, or transaction ID..."
 		onQueryChange={updateUrl}
 	>
 		{#snippet children(filters, update)}
 			<div class="flex flex-col gap-2">
-				<Label class="text-sm font-medium">Expense Type</Label>
+				<Label class="text-sm font-medium">Transaction Type</Label>
 
-				<Select
-					type="single"
-					value={filters.expenseTypeId}
-					onValueChange={(value) => update('expenseTypeId', value)}
-				>
+				<Select type="single" value={filters.type} onValueChange={(value) => update('type', value)}>
 					<SelectTrigger class="w-full">
-						{data.expenseTypeList.find((type) => type.value === filters.expenseTypeId)?.name ??
-							'All expense types'}
+						{filters.type || 'All transaction types'}
 					</SelectTrigger>
 
 					<SelectContent>
-						<SelectItem value="">All expense types</SelectItem>
+						<SelectItem value="">All transaction types</SelectItem>
 
-						{#each data.expenseTypeList as type}
-							<SelectItem value={type.value}>
-								{type.name}
-							</SelectItem>
-						{/each}
+						<!-- Adjust these values to match your actual DB values -->
+						<SelectItem value="credit">Credit</SelectItem>
+						<SelectItem value="debit">Debit</SelectItem>
+						<SelectItem value="payment">Payment</SelectItem>
+						<SelectItem value="refund">Refund</SelectItem>
+						<SelectItem value="withdrawal">Withdrawal</SelectItem>
+						<SelectItem value="deposit">Deposit</SelectItem>
 					</SelectContent>
 				</Select>
 			</div>
 
 			<div class="flex flex-col gap-2">
-				<Label class="text-sm font-medium">Added By</Label>
+				<Label class="text-sm font-medium">Transaction Status</Label>
 
 				<Select
 					type="single"
-					value={filters.addedById}
-					onValueChange={(value) => update('addedById', value)}
+					value={filters.status}
+					onValueChange={(value) => update('status', value)}
 				>
 					<SelectTrigger class="w-full">
-						{data.adminUserList.find((admin) => admin.value === filters.addedById)?.name ??
-							'All admins'}
+						{filters.status || 'All statuses'}
 					</SelectTrigger>
 
 					<SelectContent>
-						<SelectItem value="">All admins</SelectItem>
+						<SelectItem value="">All statuses</SelectItem>
 
-						{#each data.adminUserList as admin}
-							<SelectItem value={admin.value}>
-								{admin.name}
-							</SelectItem>
-						{/each}
+						<!-- Adjust these values to match your actual DB values -->
+						<SelectItem value="pending">Pending</SelectItem>
+						<SelectItem value="completed">Completed</SelectItem>
+						<SelectItem value="failed">Failed</SelectItem>
+						<SelectItem value="canceled">Canceled</SelectItem>
 					</SelectContent>
 				</Select>
 			</div>
 		{/snippet}
 	</QueryBuilder>
 
-	{#if data.allExpenses.length === 0}
+	{#if data.allTransactions.length === 0}
 		<div
 			class="flex min-h-100 flex-col items-center justify-center rounded-xl border border-dashed bg-card p-12 text-center"
 		>
@@ -154,25 +148,25 @@
 				<CalendarDays class="size-10 text-muted-foreground" />
 			</div>
 
-			<h3 class="mt-6 text-xl font-semibold">No expenses found</h3>
+			<h3 class="mt-6 text-xl font-semibold">No transactions found</h3>
 
 			<p class="mt-2 mb-8 max-w-sm text-muted-foreground">
-				There are no expenses for the selected filters.
+				There are no transactions for the selected filters.
 			</p>
 		</div>
 	{:else}
 		<div class="rounded-lg border bg-card p-4 shadow-sm">
 			<FilterMenu
+				data={data?.allTransactions}
 				bind:filteredList
-				data={data?.allExpenses}
-				filterKeys={['amount', 'expenseType', 'date', 'addedBy']}
+				filterKeys={['type', 'amount', 'status']}
 			/>
 
-			<Mobile expenses={filteredList} />
+			<Mobile transactions={filteredList} />
 
 			<DataTable
 				data={filteredList}
-				fileName={`Expenses ${data.query.start} - ${data.query.end}`}
+				fileName={`Transactions History ${data.query.start} - ${data.query.end}`}
 				{columns}
 			/>
 		</div>

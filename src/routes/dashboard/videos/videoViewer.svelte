@@ -6,13 +6,16 @@
 	import type { changeStatus } from './schema';
 	import Edit from './edit.svelte';
 
+	import { fly } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
+
 	type Props = {
 		src: string;
 		label?: string;
 		poster?: string;
 		id: string;
 		form: SuperValidated<Infer<typeof changeStatus>>;
-		verificationsStates?: string[{ state }];
+		verificationsStates?: { state: string }[];
 		rows: any[];
 		rowIndex: number;
 	};
@@ -32,10 +35,9 @@
 	let modalVideoEl = $state<HTMLVideoElement | null>(null);
 	let isHovered = $state(false);
 
-	// ✅ Mutable state — not $derived
-	let currentIndex = $derived(rowIndex);
+	// Important: this must be mutable state
+	let currentIndex = $state(rowIndex);
 
-	// ✅ Derive video data from currentIndex
 	const currentRow = $derived(rows[currentIndex]?.original);
 	const currentSrc = $derived(currentRow?.url ?? src);
 	const currentLabel = $derived(currentRow?.title ?? label);
@@ -43,58 +45,77 @@
 	const currentId = $derived(currentRow?.id ?? id);
 	const idArray = $derived([currentId]);
 
-	// ✅ Restart video when navigating
-	$effect(() => {
-		if (open && modalVideoEl) {
-			modalVideoEl.load();
-			modalVideoEl.play().catch(() => {});
-		}
-	});
+	// 1 = next, -1 = previous
+	let slideDirection = $state(1);
+
+	let touchStartY = $state(0);
+	let dragY = $state(0);
+	const minSwipeDistance = 50;
 
 	$effect(() => {
 		if (open && modalVideoEl) {
 			modalVideoEl.play().catch(() => {});
 		}
 	});
-
 	function goPrev() {
-		if (currentIndex > 0) currentIndex--;
+		if (currentIndex > 0) {
+			hasVideoMetadata = false;
+			slideDirection = -1;
+			currentIndex--;
+		}
 	}
 
 	function goNext() {
-		if (currentIndex < rows.length - 1) currentIndex++;
+		if (currentIndex < rows.length - 1) {
+			hasVideoMetadata = false;
+			slideDirection = 1;
+			currentIndex++;
+		}
 	}
 
-	let touchStartY = $state(0);
-	let touchEndY = $state(0);
-	const minSwipeDistance = 50; // Minimum pixels to qualify as a swipe
-
 	function handleTouchStart(e: TouchEvent) {
-		touchStartY = e.touches[0].screenY;
+		touchStartY = e.touches[0].clientY;
+		dragY = 0;
 	}
 
 	function handleTouchMove(e: TouchEvent) {
-		// Prevents elastic bouncing/scrolling the underlying page while swiping the video
+		const currentY = e.touches[0].clientY;
+		dragY = currentY - touchStartY;
+
 		if (e.cancelable) e.preventDefault();
 	}
 
-	function handleTouchEnd(e: TouchEvent) {
-		touchEndY = e.changedTouches[0].screenY;
-		handleSwipeGesture();
-	}
-
-	function handleSwipeGesture() {
-		const distance = touchStartY - touchEndY;
-
-		// Swipe Up -> Next Video (Distance is positive)
-		if (distance > minSwipeDistance) {
+	function handleTouchEnd() {
+		if (dragY < -minSwipeDistance && currentIndex < rows.length - 1) {
 			goNext();
-		}
-		// Swipe Down -> Previous Video (Distance is negative)
-		else if (distance < -minSwipeDistance) {
+		} else if (dragY > minSwipeDistance && currentIndex > 0) {
 			goPrev();
 		}
+
+		dragY = 0;
 	}
+
+	let isPortraitVideo = $state(false);
+	let hasVideoMetadata = $state(false);
+
+	function handleVideoMetadata(e: Event) {
+		const video = e.currentTarget as HTMLVideoElement;
+
+		isPortraitVideo = video.videoHeight > video.videoWidth;
+		hasVideoMetadata = true;
+	}
+
+	const dialogContentClass = $derived(
+		isPortraitVideo
+			? 'flex max-h-[100dvh] flex-col gap-0 overflow-hidden p-0 sm:!max-w-[520px] md:!max-w-[560px] lg:!max-w-[620px] max-sm:!h-[100dvh] max-sm:!w-[100dvw] max-sm:!max-w-none max-sm:!rounded-none max-sm:!border-0'
+			: 'gap-0 overflow-hidden p-0 sm:!max-w-3xl'
+	);
+
+	const videoShellClass = $derived(
+		isPortraitVideo
+			? 'relative min-h-0 w-full flex-1 overflow-hidden bg-black sm:h-[75dvh] sm:flex-none'
+			: 'relative aspect-video w-full overflow-hidden bg-black'
+	);
 </script>
 
 <Dialog.Root bind:open>
@@ -153,78 +174,109 @@
 	</Dialog.Trigger>
 
 	<!-- MODAL CONTENT -->
-	<Dialog.Content class="gap-0 overflow-hidden p-0 ">
+	<Dialog.Content class={dialogContentClass}>
 		<Dialog.Header class="border-b bg-muted/30 p-4">
 			<div class="flex items-center gap-2">
 				<Video class="h-4 w-4 text-primary" />
-				<Dialog.Title class="text-base font-medium">{currentLabel ?? 'Video Preview'}</Dialog.Title>
+				<Dialog.Title class="text-base font-medium">
+					{currentLabel ?? 'Video Preview'}
+				</Dialog.Title>
 			</div>
 		</Dialog.Header>
-		<div class="my-2 flex flex-row flex-wrap items-start justify-start px-2">
-			<Edit
-				data={form}
-				name="Discoverablity"
-				action="?/discover"
-				discoverable={true}
-				ids={idArray}
-				disabled={false}
-			/>
 
-			<Edit
-				data={form}
-				name="Compliance Reviewed"
-				action="?/review"
-				discoverable={false}
-				ids={idArray}
-				disabled={false}
-			/>
-
-			<Edit
-				data={form}
-				name="Verification State"
-				action="?/verify"
-				discoverable={false}
-				ids={idArray}
-				disabled={false}
-				{verificationsStates}
-			/>
-		</div>
-
-		<div
-			class="aspect-video w-full bg-black"
-			ontouchstart={handleTouchStart}
-			ontouchend={handleTouchEnd}
-			role="region"
-			aria-label="Video player swipe controls. Swipe up for next video, swipe down for previous video."
-		>
-			<video
-				bind:this={modalVideoEl}
-				src={currentSrc}
-				poster={currentPoster}
-				controls
-				playsinline
-				class="h-full w-full"
+		<div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+			<div
+				class="flex shrink-0 flex-row flex-wrap items-start justify-start gap-2 overflow-y-auto px-2 py-2"
 			>
-				<track kind="captions" />
-				Your browser does not support the video tag.
-			</video>
-		</div>
-		<div class="flex items-center justify-between border-t px-4 py-3">
-			<Button variant="outline" size="sm" disabled={currentIndex === 0} onclick={goPrev}>
-				<ChevronLeft /> Previous
-			</Button>
-			<span class="text-sm text-muted-foreground">
-				{currentIndex + 1} / {rows.length}
-			</span>
-			<Button
-				variant="outline"
-				size="sm"
-				disabled={currentIndex === rows.length - 1}
-				onclick={goNext}
+				<Edit
+					data={form}
+					name="Discoverablity"
+					action="?/discover"
+					discoverable={true}
+					ids={idArray}
+					disabled={false}
+				/>
+
+				<Edit
+					data={form}
+					name="Compliance Reviewed"
+					action="?/review"
+					discoverable={false}
+					ids={idArray}
+					disabled={false}
+				/>
+
+				<Edit
+					data={form}
+					name="Verification State"
+					action="?/verify"
+					discoverable={false}
+					ids={idArray}
+					disabled={false}
+					{verificationsStates}
+				/>
+			</div>
+
+			<div
+				class={videoShellClass}
+				ontouchstart={handleTouchStart}
+				ontouchmove={handleTouchMove}
+				ontouchend={handleTouchEnd}
+				role="region"
+				aria-label="Video player swipe controls. Swipe up for next video, swipe down for previous video."
 			>
-				Next <ChevronRight />
-			</Button>
+				{#key currentId}
+					<div
+						class="absolute inset-0"
+						style:transform={`translateY(${dragY}px)`}
+						in:fly={{
+							y: slideDirection * 180,
+							duration: 260,
+							easing: cubicOut
+						}}
+						out:fly={{
+							y: -slideDirection * 180,
+							duration: 220,
+							easing: cubicOut
+						}}
+					>
+						<video
+							bind:this={modalVideoEl}
+							src={currentSrc}
+							poster={currentPoster}
+							controls
+							playsinline
+							autoplay
+							onloadedmetadata={handleVideoMetadata}
+							class="h-full w-full object-contain"
+						>
+							<track kind="captions" />
+							Your browser does not support the video tag.
+						</video>
+					</div>
+				{/key}
+			</div>
+
+			<div class="flex items-center justify-between border-t px-4 py-3">
+				<Button variant="outline" size="sm" disabled={currentIndex === 0} onclick={goPrev}>
+					<ChevronLeft /> Previous
+				</Button>
+
+				<span class="text-sm text-muted-foreground">
+					{currentIndex + 1} / {rows.length}
+				</span>
+
+				<Button
+					variant="outline"
+					size="sm"
+					disabled={currentIndex === rows.length - 1}
+					onclick={goNext}
+				>
+					Next <ChevronRight />
+				</Button>
+			</div>
 		</div>
+
 		<Dialog.Footer class="flex flex-row items-start justify-between">
 			<Dialog.Close>
 				<Button variant="secondary" size="sm"><X /> Close</Button>

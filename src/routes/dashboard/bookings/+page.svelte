@@ -17,19 +17,19 @@
 
 	let { data } = $props();
 
-	let filteredList = $derived(data?.allExpenses);
+	let filteredList = $derived(data?.allData);
 
-	type ExpenseQueryFilters = {
-		expenseTypeId: string;
-		addedById: string;
+	type BookingQueryFilters = {
+		bookingStatus: string;
+		paymentStatus: string;
 	};
 
-	const initialCustomFilters: ExpenseQueryFilters = {
-		expenseTypeId: data.query.expenseTypeId ?? '',
-		addedById: data.query.addedById ?? ''
+	const initialCustomFilters: BookingQueryFilters = {
+		bookingStatus: data.query.bookingStatus ?? '',
+		paymentStatus: data.query.paymentStatus ?? ''
 	};
 
-	function updateUrl(payload: QueryFilterPayload<ExpenseQueryFilters>) {
+	function updateUrl(payload: QueryFilterPayload<BookingQueryFilters>) {
 		const params = new URLSearchParams(page.url.searchParams);
 
 		setOrDelete(params, 'search', payload.search);
@@ -39,8 +39,8 @@
 			setOrDelete(params, 'end', payload.dateRange.end.toString());
 		}
 
-		setOrDelete(params, 'expenseTypeId', payload.customFilters.expenseTypeId);
-		setOrDelete(params, 'addedById', payload.customFilters.addedById);
+		setOrDelete(params, 'bookingStatus', payload.customFilters.bookingStatus);
+		setOrDelete(params, 'paymentStatus', payload.customFilters.paymentStatus);
 
 		goto(`?${params.toString()}`, {
 			keepFocus: true,
@@ -64,25 +64,15 @@
 </script>
 
 <svelte:head>
-	<title>Expenses</title>
+	<title>Bookings</title>
 </svelte:head>
 
-<div class="mx-auto flex w-full max-w-6xl flex-col justify-start gap-8 p-6">
-	<div class="flex flex-col gap-4">
-		<div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-			<div>
-				<p class="mt-1 text-muted-foreground">
-					Reviewing {data.allExpenses?.length ?? 0} expenses
-				</p>
-			</div>
-		</div>
-	</div>
+<hr class="border-border" />
 
-	<hr class="border-border" />
-
+<div class="space-y-6">
 	<QueryBuilder
-		title="Expenses Dataset"
-		description="Load expenses by reporting period, type, admin, or reason"
+		title="Bookings Dataset"
+		description="Load bookings by date range, status, payment status, customer, provider, or service"
 		showDate
 		showPageSize={false}
 		initialSearch={data.query.search}
@@ -90,63 +80,58 @@
 		initialEnd={data.query.end}
 		{initialCustomFilters}
 		submitMode="manual"
-		searchPlaceholder="Search reason, expense type, or admin name..."
+		searchPlaceholder="Search customer, provider, service, address, or notes..."
 		onQueryChange={updateUrl}
 	>
 		{#snippet children(filters, update)}
 			<div class="flex flex-col gap-2">
-				<Label class="text-sm font-medium">Expense Type</Label>
+				<Label class="text-sm font-medium">Booking Status</Label>
 
 				<Select
 					type="single"
-					value={filters.expenseTypeId}
-					onValueChange={(value) => update('expenseTypeId', value)}
+					value={filters.bookingStatus}
+					onValueChange={(value) => update('bookingStatus', value)}
 				>
 					<SelectTrigger class="w-full">
-						{data.expenseTypeList.find((type) => type.value === filters.expenseTypeId)?.name ??
-							'All expense types'}
+						{filters.bookingStatus || 'All booking statuses'}
 					</SelectTrigger>
 
 					<SelectContent>
-						<SelectItem value="">All expense types</SelectItem>
-
-						{#each data.expenseTypeList as type}
-							<SelectItem value={type.value}>
-								{type.name}
-							</SelectItem>
-						{/each}
+						<SelectItem value="">All booking statuses</SelectItem>
+						<SelectItem value="pending">Pending</SelectItem>
+						<SelectItem value="confirmed">Confirmed</SelectItem>
+						<SelectItem value="in_progress">In Progress</SelectItem>
+						<SelectItem value="completed">Completed</SelectItem>
+						<SelectItem value="canceled">Canceled</SelectItem>
 					</SelectContent>
 				</Select>
 			</div>
 
 			<div class="flex flex-col gap-2">
-				<Label class="text-sm font-medium">Added By</Label>
+				<Label class="text-sm font-medium">Payment Status</Label>
 
 				<Select
 					type="single"
-					value={filters.addedById}
-					onValueChange={(value) => update('addedById', value)}
+					value={filters.paymentStatus}
+					onValueChange={(value) => update('paymentStatus', value)}
 				>
 					<SelectTrigger class="w-full">
-						{data.adminUserList.find((admin) => admin.value === filters.addedById)?.name ??
-							'All admins'}
+						{filters.paymentStatus || 'All payment statuses'}
 					</SelectTrigger>
 
 					<SelectContent>
-						<SelectItem value="">All admins</SelectItem>
-
-						{#each data.adminUserList as admin}
-							<SelectItem value={admin.value}>
-								{admin.name}
-							</SelectItem>
-						{/each}
+						<SelectItem value="">All payment statuses</SelectItem>
+						<SelectItem value="pending">Pending</SelectItem>
+						<SelectItem value="paid">Paid</SelectItem>
+						<SelectItem value="failed">Failed</SelectItem>
+						<SelectItem value="refunded">Refunded</SelectItem>
 					</SelectContent>
 				</Select>
 			</div>
 		{/snippet}
 	</QueryBuilder>
 
-	{#if data.allExpenses.length === 0}
+	{#if data.allData.length === 0}
 		<div
 			class="flex min-h-100 flex-col items-center justify-center rounded-xl border border-dashed bg-card p-12 text-center"
 		>
@@ -154,25 +139,36 @@
 				<CalendarDays class="size-10 text-muted-foreground" />
 			</div>
 
-			<h3 class="mt-6 text-xl font-semibold">No expenses found</h3>
+			<h3 class="mt-6 text-xl font-semibold">No bookings found</h3>
 
 			<p class="mt-2 mb-8 max-w-sm text-muted-foreground">
-				There are no expenses for the selected filters.
+				There are no booking records for the selected filters.
 			</p>
 		</div>
 	{:else}
 		<div class="rounded-lg border bg-card p-4 shadow-sm">
 			<FilterMenu
 				bind:filteredList
-				data={data?.allExpenses}
-				filterKeys={['amount', 'expenseType', 'date', 'addedBy']}
+				data={data?.allData}
+				filterKeys={[
+					'customerName',
+					'providerName',
+					'serviceName',
+					'scheduledStartTime',
+					'scheduledEndTime',
+					'bookingStatus',
+					'paymentStatus',
+					'totalPrice'
+				]}
 			/>
 
-			<Mobile expenses={filteredList} />
+			<br />
+
+			<Mobile bookings={filteredList} />
 
 			<DataTable
 				data={filteredList}
-				fileName={`Expenses ${data.query.start} - ${data.query.end}`}
+				fileName={`Bookings ${data.query.start} - ${data.query.end}`}
 				{columns}
 			/>
 		</div>
