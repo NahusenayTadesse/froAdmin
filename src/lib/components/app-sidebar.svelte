@@ -12,7 +12,9 @@
 		BanknoteArrowDown,
 		Video,
 		Link,
-		ArrowRightLeft
+		ArrowRightLeft,
+		Sheet,
+		SquarePen
 	} from '@lucide/svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
@@ -25,7 +27,16 @@
 		{ title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
 		{ title: 'Customers', url: '/dashboard/users', icon: Users },
 		{ title: 'Providers', url: '/dashboard/vendor', icon: UserCheck },
-		{ title: 'Services', url: '/dashboard/services', icon: Toolbox },
+		{
+			title: 'Services',
+			url: '/dashboard/services',
+			icon: Toolbox,
+			items: [
+				{ title: 'All Services', url: '/dashboard/services', icon: Sheet },
+				{ title: 'Service Categories', url: '/dashboard/services/categories', icon: Sheet },
+				{ title: 'Service Edit', url: '/dashboard/services/service-edit', icon: SquarePen }
+			]
+		},
 		{ title: 'Bookings', url: '/dashboard/bookings', icon: CalendarClock },
 		{ title: 'Videos', url: '/dashboard/videos', icon: Video },
 		{ title: 'Payments', url: '/dashboard/payments', icon: Banknote },
