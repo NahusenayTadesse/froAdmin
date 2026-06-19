@@ -3,7 +3,7 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	// import DialogComp from "$lib/formComponents/DialogComp.svelte";
 	// import AddCustomer from "$lib/forms/AddCustomer.svelte";
-	import { Sheet } from '@lucide/svelte';
+	import { Sheet, SquarePen } from '@lucide/svelte';
 	let { children } = $props();
 </script>
 
@@ -17,6 +17,12 @@
 		href="/dashboard/services/categories"
 		variant={page.url.pathname === '/dashboard/services/categories' ? 'default' : 'outline'}
 		><Sheet /> Services Categories</Button
+	>
+
+	<Button
+		href="/dashboard/services/service-edit"
+		variant={page.url.pathname === '/dashboard/services/service-edit' ? 'default' : 'outline'}
+		><SquarePen /> Service Edit</Button
 	>
 </div>
 

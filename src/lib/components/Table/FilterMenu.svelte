@@ -271,7 +271,7 @@
 							{:else}
 								<SlidersHorizontal class="size-4" />
 							{/if}
-							Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
+							Table Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
 						</Button>
 					{/snippet}
 				</Tooltip.Trigger>

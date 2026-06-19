@@ -16,3 +16,17 @@ export const edit = z.object({
 	status: z.boolean('Status is required')
 });
 export type Edit = z.infer<typeof edit>;
+
+const reviewSchema = z
+	.object({
+		requestId: z.string().uuid('Valid edit request ID is required.'),
+		action: z.enum(['approve', 'reject_restore', 'reject_suspend']),
+		adminNote: z.string().optional()
+	})
+	.refine(
+		(data) => data.action === 'approve' || (data.adminNote && data.adminNote.trim().length > 0),
+		{
+			message: 'An explanatory note is strictly required when rejecting a request.',
+			path: ['adminNote']
+		}
+	);
